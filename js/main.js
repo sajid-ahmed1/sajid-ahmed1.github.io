@@ -11,7 +11,7 @@ const CONFIG = {
     githubUsername: 'sajid-ahmed1',
     // Set your Medium username (e.g. '@sajid-ahmed') to load live articles
     // Leave empty to use the static placeholder articles below
-    mediumUsername: '',
+    mediumUsername: '@sajid.ahmed',
 };
 
 /* -----------------------------------------------------------------------
