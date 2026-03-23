@@ -602,72 +602,201 @@ strong { font-weight: 600; }
 .tag-app { background: rgba(251,146,60,0.1);   border-color: rgba(251,146,60,0.25);  color: #fdba74; }
 
 /* =====================================================================
-   ARTICLES
+   ARTICLES — CAROUSEL
    ===================================================================== */
-.articles-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+.carousel-outer {
+    position: relative;
     margin-top: 56px;
 }
 
-.article-card {
+.carousel-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+.carousel-slide {
+    min-width: 100%;
+}
+
+/* Two-column card layout */
+.carousel-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-lg);
-    padding: 24px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: 360px;
+    transition: border-color var(--transition);
+}
+.carousel-card:hover { border-color: rgba(99,102,241,0.4); }
+
+/* Left banner */
+.carousel-card-banner {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding: 28px;
+    overflow: hidden;
+}
+
+.carousel-card-banner img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 100%);
+}
+
+.carousel-banner-gradient {
+    position: absolute;
+    inset: 0;
+}
+
+.carousel-card-num {
+    position: relative;
+    z-index: 1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.12);
+    line-height: 1;
+    user-select: none;
+}
+
+/* Right content */
+.carousel-card-content {
+    padding: 40px 44px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    transition: border-color var(--transition), transform var(--transition);
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.5s ease forwards;
-}
-.article-card:hover {
-    border-color: var(--primary);
-    transform: translateY(-4px);
+    gap: 14px;
+    justify-content: center;
 }
 
-@keyframes fadeUp {
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.article-meta {
+.carousel-meta {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.78rem;
+    gap: 10px;
+    font-size: 0.8rem;
     color: var(--text-dim);
 }
 
-.article-meta i { color: #fff; }
+.carousel-meta i { color: var(--text-muted); font-size: 1rem; }
 
-.article-card h3 {
-    font-size: 0.97rem;
+.carousel-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.carousel-card-content h3 {
+    font-size: 1.35rem;
     font-weight: 700;
-    line-height: 1.4;
+    line-height: 1.35;
     color: var(--text);
 }
 
-.article-card p {
-    font-size: 0.85rem;
+.carousel-card-content p {
+    font-size: 0.92rem;
     color: var(--text-muted);
-    line-height: 1.6;
-    flex: 1;
+    line-height: 1.75;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.article-link {
+.carousel-read-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.83rem;
+    gap: 8px;
+    font-size: 0.92rem;
     font-weight: 600;
     color: var(--primary);
     transition: gap var(--transition);
-    margin-top: auto;
+    margin-top: 6px;
+    width: fit-content;
 }
-.article-link:hover { gap: 10px; }
+.carousel-read-btn:hover { gap: 14px; }
+
+/* Prev / Next buttons */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(8,8,16,0.8);
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.carousel-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-50%) scale(1.08);
+}
+.carousel-prev { left: 16px; }
+.carousel-next { right: 16px; }
+
+/* Footer: counter + dots */
+.carousel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.carousel-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    min-width: 32px;
+}
+
+.carousel-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.carousel-dot {
+    height: 8px;
+    width: 8px;
+    border-radius: 4px;
+    background: rgba(99,102,241,0.2);
+    border: 1px solid rgba(99,102,241,0.25);
+    cursor: pointer;
+    padding: 0;
+    transition: background var(--transition), width 0.35s ease, border-color var(--transition);
+}
+.carousel-dot.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    width: 28px;
+}
 
 /* =====================================================================
    CONTACT
@@ -733,6 +862,22 @@ footer a:hover { opacity: 0.7; }
 /* =====================================================================
    RESPONSIVE
    ===================================================================== */
+@media (max-width: 860px) {
+    .carousel-card {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+    .carousel-card-banner {
+        min-height: 180px;
+    }
+    .carousel-card-content {
+        padding: 28px;
+    }
+    .carousel-card-content h3 { font-size: 1.1rem; }
+    .carousel-prev { left: 8px; }
+    .carousel-next { right: 8px; }
+}
+
 @media (max-width: 900px) {
     .hero-inner {
         grid-template-columns: 1fr;

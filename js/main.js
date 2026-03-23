@@ -9,9 +9,7 @@
    ----------------------------------------------------------------------- */
 const CONFIG = {
     githubUsername: 'sajid-ahmed1',
-    // Set your Medium username (e.g. '@sajid-ahmed') to load live articles
-    // Leave empty to use the static placeholder articles below
-    mediumUsername: '',
+    mediumUsername: '@sajid.ahmed',
 };
 
 /* -----------------------------------------------------------------------
@@ -249,20 +247,33 @@ function initReveal() {
 }
 
 /* -----------------------------------------------------------------------
-   ARTICLES — load from Medium RSS or fall back to static
+   ARTICLES — CAROUSEL
    ----------------------------------------------------------------------- */
+const BANNER_GRADIENTS = [
+    'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+    'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)',
+    'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
+    'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
+    'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
+    'linear-gradient(135deg, #14b8a6 0%, #3b82f6 100%)',
+    'linear-gradient(135deg, #f97316 0%, #6366f1 100%)',
+    'linear-gradient(135deg, #a855f7 0%, #06b6d4 100%)',
+];
+
 async function loadArticles() {
-    const grid = document.getElementById('articles-grid');
+    const wrapper    = document.getElementById('articles-carousel');
+    const track      = document.getElementById('carousel-track');
+    const dotsEl     = document.getElementById('carousel-dots');
+    const counterEl  = document.getElementById('carousel-counter');
     const profileLink = document.getElementById('medium-profile-link');
     const contactLink = document.getElementById('medium-contact-link');
-    if (!grid) return;
+    if (!track) return;
 
     let articles = STATIC_ARTICLES;
 
     if (CONFIG.mediumUsername) {
         const rssUrl = `https://medium.com/feed/${CONFIG.mediumUsername}`;
-        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=6`;
-
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=8`;
         try {
             const resp = await fetch(apiUrl);
             const data = await resp.json();
@@ -270,38 +281,97 @@ async function loadArticles() {
                 const mediumBase = `https://medium.com/${CONFIG.mediumUsername}`;
                 if (profileLink) profileLink.href = mediumBase;
                 if (contactLink) contactLink.href = mediumBase;
-
-                articles = data.items.slice(0, 6).map(item => ({
+                articles = data.items.map(item => ({
                     title:       item.title,
-                    description: item.description?.replace(/<[^>]+>/g, '').slice(0, 160) + '…',
+                    description: item.description?.replace(/<[^>]+>/g, '').slice(0, 280) + '…',
                     link:        item.link,
                     date:        new Date(item.pubDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
                     readTime:    estimateReadTime(item.description || ''),
+                    thumbnail:   item.thumbnail || item.enclosure?.link || '',
+                    categories:  (item.categories || []).slice(0, 3),
                 }));
             }
-        } catch (_) { /* use static fallback */ }
+        } catch (_) { /* static fallback */ }
     }
 
-    grid.innerHTML = articles.map((a, i) => `
-        <div class="article-card reveal" style="animation-delay:${i * 0.1}s">
-            <div class="article-meta">
-                <i class="fab fa-medium"></i>
-                <span>${a.date}</span>
-                <span>·</span>
-                <span>${a.readTime}</span>
-            </div>
-            <h3>${escapeHtml(a.title)}</h3>
-            <p>${escapeHtml(a.description)}</p>
-            <a href="${a.link}" target="_blank" rel="noopener" class="article-link">
-                Read article <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-    `).join('');
+    // Build slides
+    track.innerHTML = articles.map((a, i) => {
+        const grad = BANNER_GRADIENTS[i % BANNER_GRADIENTS.length];
+        const banner = a.thumbnail
+            ? `<img src="${a.thumbnail}" alt="" loading="lazy"><div class="banner-overlay"></div>`
+            : `<div class="carousel-banner-gradient" style="background:${grad}"></div>`;
+        const tags = (a.categories || [])
+            .map(c => `<span class="tag tag-ai">${escapeHtml(c)}</span>`).join('');
 
-    // Trigger reveal for newly added cards
-    document.querySelectorAll('#articles-grid .reveal').forEach(el => {
-        setTimeout(() => el.classList.add('visible'), 100);
+        return `
+            <div class="carousel-slide">
+                <div class="carousel-card">
+                    <div class="carousel-card-banner">
+                        ${banner}
+                        <div class="carousel-card-num">${String(i + 1).padStart(2, '0')}</div>
+                    </div>
+                    <div class="carousel-card-content">
+                        <div class="carousel-meta">
+                            <i class="fab fa-medium"></i>
+                            <span>${a.date}</span>
+                            <span>&middot;</span>
+                            <span>${a.readTime}</span>
+                        </div>
+                        ${tags ? `<div class="carousel-tags">${tags}</div>` : ''}
+                        <h3>${escapeHtml(a.title)}</h3>
+                        <p>${escapeHtml(a.description)}</p>
+                        <a href="${a.link}" target="_blank" rel="noopener" class="carousel-read-btn">
+                            Read on Medium <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+
+    const total = articles.length;
+
+    // Dots
+    dotsEl.innerHTML = articles.map((_, i) =>
+        `<button class="carousel-dot${i === 0 ? ' active' : ''}" data-idx="${i}" aria-label="Article ${i + 1}"></button>`
+    ).join('');
+
+    if (counterEl) counterEl.textContent = `1 / ${total}`;
+
+    // State
+    let current = 0;
+    let autoTimer;
+
+    function goTo(idx) {
+        current = ((idx % total) + total) % total;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dotsEl.querySelectorAll('.carousel-dot').forEach((d, i) =>
+            d.classList.toggle('active', i === current));
+        if (counterEl) counterEl.textContent = `${current + 1} / ${total}`;
+    }
+
+    const startAuto = () => { autoTimer = setInterval(() => goTo(current + 1), 6000); };
+    const stopAuto  = () => clearInterval(autoTimer);
+
+    document.getElementById('carousel-prev').addEventListener('click', () => { stopAuto(); goTo(current - 1); startAuto(); });
+    document.getElementById('carousel-next').addEventListener('click', () => { stopAuto(); goTo(current + 1); startAuto(); });
+
+    dotsEl.addEventListener('click', e => {
+        const idx = e.target.dataset.idx;
+        if (idx !== undefined) { stopAuto(); goTo(+idx); startAuto(); }
     });
+
+    // Touch swipe
+    let tx = 0;
+    wrapper.addEventListener('touchstart', e => { tx = e.changedTouches[0].clientX; }, { passive: true });
+    wrapper.addEventListener('touchend',   e => {
+        const dx = e.changedTouches[0].clientX - tx;
+        if (Math.abs(dx) > 50) { stopAuto(); goTo(dx < 0 ? current + 1 : current - 1); startAuto(); }
+    });
+
+    wrapper.addEventListener('mouseenter', stopAuto);
+    wrapper.addEventListener('mouseleave', startAuto);
+
+    startAuto();
 }
 
 function estimateReadTime(html) {
