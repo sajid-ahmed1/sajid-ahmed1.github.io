@@ -398,12 +398,28 @@
         <div class="container">
             <h2 class="section-title">Medium <span class="gradient-text">Articles</span></h2>
             <p class="section-subtitle">Writing about data science, machine learning, and AI</p>
-            <div class="articles-grid" id="articles-grid">
-                <!-- Populated by JS or static fallback below -->
+
+            <div class="carousel-outer">
+                <div class="carousel-wrapper" id="articles-carousel">
+                    <div class="carousel-track" id="carousel-track">
+                        <!-- Slides injected by JS -->
+                    </div>
+                    <button class="carousel-btn carousel-prev" id="carousel-prev" aria-label="Previous article">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-btn carousel-next" id="carousel-next" aria-label="Next article">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="carousel-footer">
+                    <span class="carousel-counter" id="carousel-counter">1 / 3</span>
+                    <div class="carousel-dots" id="carousel-dots"></div>
+                </div>
             </div>
+
             <div class="section-footer">
-                <a href="https://medium.com/" target="_blank" rel="noopener" class="btn btn-secondary" id="medium-profile-link">
-                    <i class="fab fa-medium"></i> Read More on Medium
+                <a href="https://medium.com/@sajid.ahmed" target="_blank" rel="noopener" class="btn btn-secondary" id="medium-profile-link">
+                    <i class="fab fa-medium"></i> View All on Medium
                 </a>
             </div>
         </div>
@@ -426,7 +442,7 @@
                     <i class="fab fa-github"></i>
                     <span>GitHub</span>
                 </a>
-                <a href="https://medium.com/" target="_blank" rel="noopener" class="contact-card reveal" id="medium-contact-link">
+                <a href="https://medium.com/@sajid.ahmed" target="_blank" rel="noopener" class="contact-card reveal" id="medium-contact-link">
                     <i class="fab fa-medium"></i>
                     <span>Medium</span>
                 </a>
