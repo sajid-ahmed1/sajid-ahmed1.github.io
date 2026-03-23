@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sajid Ahmed — Data Scientist & Gen AI Engineer. Cambridge MPhil student and Vodafone Insight Analyst based in London.">
+    <meta property="og:title" content="Sajid Ahmed | Data Scientist & Gen AI Engineer">
+    <meta property="og:description" content="Portfolio showcasing data science, machine learning, and Gen AI projects.">
+    <meta property="og:image" content="https://avatars.githubusercontent.com/u/69683657?v=4">
+    <title>Sajid Ahmed | Data Scientist & Gen AI Engineer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ===================== NAVIGATION ===================== -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <span class="logo-bracket">&lt;</span>SA<span class="logo-bracket">/&gt;</span>
+            </a>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#skills" class="nav-link">Skills</a></li>
+                <li><a href="#projects" class="nav-link">Projects</a></li>
+                <li><a href="#articles" class="nav-link">Articles</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===================== HERO ===================== -->
+    <section id="hero">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-inner">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    Open to opportunities
+                </div>
+                <h1 class="hero-name">
+                    Hi, I'm <span class="gradient-text">Sajid Ahmed</span>
+                </h1>
+                <h2 class="hero-subtitle">
+                    <span id="typed-text"></span><span class="cursor">|</span>
+                </h2>
+                <p class="hero-description">
+                    Channels Insight Analyst at <strong>Vodafone</strong> &middot; Part-time MPhil Economics &amp; Data Science at <strong>Cambridge University</strong> &middot;
+                    Building AI-powered solutions at the intersection of business and technology.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#projects" class="btn btn-primary">
+                        <i class="fas fa-code"></i> View Projects
+                    </a>
+                    <a href="https://github.com/sajid-ahmed1" target="_blank" rel="noopener" class="btn btn-secondary">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                    <a href="https://www.linkedin.com/in/sajid-ahmed-b110a014a/" target="_blank" rel="noopener" class="btn btn-secondary">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="stat-number">28+</span>
+                        <span class="stat-label">Repositories</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="stat-number">5+</span>
+                        <span class="stat-label">Years in Data</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="stat-number">2</span>
+                        <span class="stat-label">Degrees</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-avatar">
+                <div class="avatar-glow"></div>
+                <div class="avatar-ring">
+                    <img src="https://avatars.githubusercontent.com/u/69683657?v=4" alt="Sajid Ahmed" class="avatar-img">
+                </div>
+            </div>
+        </div>
+        <a href="#about" class="scroll-indicator" aria-label="Scroll down">
+            <div class="scroll-mouse">
+                <div class="scroll-wheel"></div>
+            </div>
+        </a>
+    </section>
+
+    <!-- ===================== ABOUT ===================== -->
+    <section id="about" class="section">
+        <div class="container">
+            <h2 class="section-title">About <span class="gradient-text">Me</span></h2>
+            <div class="about-grid">
+                <div class="about-text reveal">
+                    <p>
+                        I'm a data scientist and Gen AI practitioner based in London, combining hands-on industry experience
+                        at Vodafone with rigorous academic training at Cambridge University. My work sits at the intersection of
+                        advanced analytics, machine learning, and artificial intelligence.
+                    </p>
+                    <p>
+                        At Vodafone, I analyse channel performance data to uncover insights that drive strategic decisions across
+                        the business. In my studies at Cambridge, I explore the theoretical foundations of economics and data science,
+                        applying rigorous methodology to real-world problems.
+                    </p>
+                    <p>
+                        I'm passionate about Generative AI — from building LLM-powered agents with LangChain to creating health-tech
+                        applications like GutWise. I love turning complex data into clear, actionable stories that make an impact.
+                    </p>
+                </div>
+                <div class="about-cards reveal">
+                    <div class="about-card">
+                        <div class="about-card-icon">🎓</div>
+                        <h3>Education</h3>
+                        <p><strong>MPhil Economics &amp; Data Science</strong></p>
+                        <p>University of Cambridge</p>
+                    </div>
+                    <div class="about-card">
+                        <div class="about-card-icon">💼</div>
+                        <h3>Experience</h3>
+                        <p><strong>Channels Insight Analyst</strong></p>
+                        <p>Vodafone, London</p>
+                    </div>
+                    <div class="about-card">
+                        <div class="about-card-icon">📍</div>
+                        <h3>Location</h3>
+                        <p><strong>London, UK</strong></p>
+                        <p>Open to remote &amp; hybrid</p>
+                    </div>
+                    <div class="about-card">
+                        <div class="about-card-icon">🎯</div>
+                        <h3>Focus</h3>
+                        <p><strong>Gen AI &amp; Data Science</strong></p>
+                        <p>AI-powered product development</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== SKILLS ===================== -->
+    <section id="skills" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Technical <span class="gradient-text">Skills</span></h2>
+            <div class="skills-grid">
+                <div class="skill-category reveal">
+                    <div class="skill-category-header">
+                        <span class="skill-icon">🤖</span>
+                        <h3>Gen AI &amp; LLMs</h3>
+                    </div>
+                    <div class="skill-chips">
+                        <span class="chip chip-ai">LangChain</span>
+                        <span class="chip chip-ai">OpenAI API</span>
+                        <span class="chip chip-ai">Prompt Engineering</span>
+                        <span class="chip chip-ai">LLM Agents</span>
+                        <span class="chip chip-ai">RAG</span>
+                        <span class="chip chip-ai">Vector Databases</span>
+                    </div>
+                </div>
+                <div class="skill-category reveal">
+                    <div class="skill-category-header">
+                        <span class="skill-icon">📊</span>
+                        <h3>Machine Learning</h3>
+                    </div>
+                    <div class="skill-chips">
+                        <span class="chip chip-ml">Scikit-learn</span>
+                        <span class="chip chip-ml">XGBoost</span>
+                        <span class="chip chip-ml">NLP</span>
+                        <span class="chip chip-ml">Classification</span>
+                        <span class="chip chip-ml">Regression</span>
+                        <span class="chip chip-ml">Recommendation Systems</span>
+                        <span class="chip chip-ml">Time Series</span>
+                    </div>
+                </div>
+                <div class="skill-category reveal">
+                    <div class="skill-category-header">
+                        <span class="skill-icon">🐍</span>
+                        <h3>Data Science</h3>
+                    </div>
+                    <div class="skill-chips">
+                        <span class="chip chip-ds">Python</span>
+                        <span class="chip chip-ds">Pandas</span>
+                        <span class="chip chip-ds">NumPy</span>
+                        <span class="chip chip-ds">Matplotlib</span>
+                        <span class="chip chip-ds">Seaborn</span>
+                        <span class="chip chip-ds">Plotly</span>
+                        <span class="chip chip-ds">Jupyter</span>
+                    </div>
+                </div>
+                <div class="skill-category reveal">
+                    <div class="skill-category-header">
+                        <span class="skill-icon">⚡</span>
+                        <h3>Engineering &amp; Tools</h3>
+                    </div>
+                    <div class="skill-chips">
+                        <span class="chip chip-eng">FastAPI</span>
+                        <span class="chip chip-eng">TypeScript</span>
+                        <span class="chip chip-eng">SQL</span>
+                        <span class="chip chip-eng">Git</span>
+                        <span class="chip chip-eng">REST APIs</span>
+                        <span class="chip chip-eng">Docker</span>
+                        <span class="chip chip-eng">Excel</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== PROJECTS ===================== -->
+    <section id="projects" class="section">
+        <div class="container">
+            <h2 class="section-title">Featured <span class="gradient-text">Projects</span></h2>
+            <p class="section-subtitle">Data science, machine learning, and Gen AI work</p>
+
+            <div class="projects-grid">
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">🤖</div>
+                        <a href="https://github.com/sajid-ahmed1/langchain_learning" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>LangChain LLM Agent</h3>
+                    <p>Built a custom LLM agent using LangChain demonstrating advanced prompt engineering, tool use, and chain-of-thought reasoning with large language models.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-ai">Gen AI</span>
+                        <span class="tag">LangChain</span>
+                        <span class="tag">Python</span>
+                    </div>
+                </div>
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">🏥</div>
+                        <a href="https://github.com/sajid-ahmed1/gutwise" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>GutWise — Health Tech App</h3>
+                    <p>Full-stack health application for Crohn's disease and digestive health patients, providing personalised tracking, insights, and dietary recommendations.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-app">App</span>
+                        <span class="tag">TypeScript</span>
+                        <span class="tag">Health Tech</span>
+                    </div>
+                </div>
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">📡</div>
+                        <a href="https://github.com/sajid-ahmed1/meetup_chatbot" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>Meetup Chatbot</h3>
+                    <p>AI-powered chatbot built with TypeScript for community meetup coordination, leveraging natural language understanding to handle event queries and RSVPs.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-ai">Gen AI</span>
+                        <span class="tag">TypeScript</span>
+                        <span class="tag">Chatbot</span>
+                    </div>
+                </div>
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">🚨</div>
+                        <a href="https://github.com/sajid-ahmed1/disaster-response-pipeline" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>Disaster Response Pipeline</h3>
+                    <p>NLP pipeline to classify disaster response messages, helping emergency services route assistance effectively. Built for Udacity Data Scientist Nanodegree.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-ml">NLP</span>
+                        <span class="tag">Scikit-learn</span>
+                        <span class="tag">Python</span>
+                    </div>
+                </div>
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">🎯</div>
+                        <a href="https://github.com/sajid-ahmed1/Recommendation_System_Udacity" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>Recommendation System</h3>
+                    <p>Implemented collaborative filtering, content-based, and matrix factorisation recommendation algorithms. Udacity Data Scientist Nanodegree capstone.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-ml">ML</span>
+                        <span class="tag">Collab Filtering</span>
+                        <span class="tag">Python</span>
+                    </div>
+                </div>
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">🏠</div>
+                        <a href="https://github.com/sajid-ahmed1/Airbnb_ds_nanodegree" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>Airbnb Price Analysis</h3>
+                    <p>Analysed Boston Airbnb data to uncover pricing drivers using feature engineering and regression models. Insights published as a blog post.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-ds">Data Science</span>
+                        <span class="tag">Regression</span>
+                        <span class="tag">EDA</span>
+                    </div>
+                </div>
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">💊</div>
+                        <a href="https://github.com/sajid-ahmed1/diabetes" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>Diabetes Risk Prediction</h3>
+                    <p>Predictive modelling on the Pima Indians Diabetes Dataset as part of Cambridge's D100 Fundamentals of Data Science. Analysis published as a Medium article.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-ds">Data Science</span>
+                        <span class="tag">Classification</span>
+                        <span class="tag">Cambridge</span>
+                    </div>
+                </div>
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">🚗</div>
+                        <a href="https://github.com/sajid-ahmed1/Uber-Trips" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>NYC Uber Trip Analysis</h3>
+                    <p>Geospatial and temporal analysis of 4.5M+ Uber trips in New York City (2014) from FiveThirtyEight data, revealing demand hotspots and peak patterns.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-ds">Data Science</span>
+                        <span class="tag">Geospatial</span>
+                        <span class="tag">EDA</span>
+                    </div>
+                </div>
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">⚡</div>
+                        <a href="https://github.com/sajid-ahmed1/test_fastapi" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>FastAPI Full-Stack App</h3>
+                    <p>Frontend and backend application built with FastAPI demonstrating REST API design, data validation, and modern Python web development practices.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-app">App</span>
+                        <span class="tag">FastAPI</span>
+                        <span class="tag">Python</span>
+                    </div>
+                </div>
+
+                <div class="project-card reveal">
+                    <div class="project-header">
+                        <div class="project-emoji">₿</div>
+                        <a href="https://github.com/sajid-ahmed1/Bitcoin-and-Ether-Analysis" target="_blank" rel="noopener" class="project-gh-link" title="View on GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <h3>Crypto Price Analysis</h3>
+                    <p>Time series analysis and visualisation of Bitcoin and Ethereum price trends, volatility patterns, and correlation analysis between major cryptocurrencies.</p>
+                    <div class="project-tags">
+                        <span class="tag tag-ds">Data Science</span>
+                        <span class="tag">Time Series</span>
+                        <span class="tag">Finance</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="section-footer">
+                <a href="https://github.com/sajid-ahmed1" target="_blank" rel="noopener" class="btn btn-secondary">
+                    <i class="fab fa-github"></i> View All Repositories
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== ARTICLES ===================== -->
+    <section id="articles" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Medium <span class="gradient-text">Articles</span></h2>
+            <p class="section-subtitle">Writing about data science, machine learning, and AI</p>
+            <div class="articles-grid" id="articles-grid">
+                <!-- Populated by JS or static fallback below -->
+            </div>
+            <div class="section-footer">
+                <a href="https://medium.com/" target="_blank" rel="noopener" class="btn btn-secondary" id="medium-profile-link">
+                    <i class="fab fa-medium"></i> Read More on Medium
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== CONTACT ===================== -->
+    <section id="contact" class="section">
+        <div class="container contact-container">
+            <h2 class="section-title">Get In <span class="gradient-text">Touch</span></h2>
+            <p class="section-subtitle">
+                Open to data science, Gen AI, and analytics roles. Feel free to reach out for collaborations,
+                opportunities, or just a chat about AI and data.
+            </p>
+            <div class="contact-links">
+                <a href="https://www.linkedin.com/in/sajid-ahmed-b110a014a/" target="_blank" rel="noopener" class="contact-card reveal">
+                    <i class="fab fa-linkedin"></i>
+                    <span>LinkedIn</span>
+                </a>
+                <a href="https://github.com/sajid-ahmed1" target="_blank" rel="noopener" class="contact-card reveal">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+                <a href="https://medium.com/" target="_blank" rel="noopener" class="contact-card reveal" id="medium-contact-link">
+                    <i class="fab fa-medium"></i>
+                    <span>Medium</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer>
+        <div class="container">
+            <p>
+                Built by <strong>Sajid Ahmed</strong> &middot;
+                <a href="https://github.com/sajid-ahmed1/sajid-ahmed1.github.io" target="_blank" rel="noopener">Source</a>
+                &middot; London, UK
+            </p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
