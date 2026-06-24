@@ -1,100 +1,326 @@
 /* =====================================================================
-   SAJID AHMED — PORTFOLIO JS
+   SAJID AHMED — SECOND BRAIN
+   A no-build, client-side wiki. Notes are markdown files in /notes,
+   indexed by /notes/index.json. This script loads the manifest, routes
+   on the URL hash, and renders markdown in the browser.
    ===================================================================== */
 
 'use strict';
 
-/* -----------------------------------------------------------------------
-   CONFIG — Update your Medium username to enable live article loading
-   ----------------------------------------------------------------------- */
-const CONFIG = {
-    githubUsername: 'sajid-ahmed1',
-    mediumUsername: '@sajid.ahmed',
+const MANIFEST_URL = 'notes/index.json';
+
+/* App state — populated once from the manifest, then read by the router. */
+const state = {
+    site: null,
+    categories: [],
+    notes: [],
+    bySlug: new Map(),
+    byCategory: new Map(),
+    tags: new Map(), // tag -> count
 };
 
 /* -----------------------------------------------------------------------
-   STATIC ARTICLE FALLBACK
-   Replace / extend these with your actual Medium article data
+   BOOT
    ----------------------------------------------------------------------- */
-const STATIC_ARTICLES = [
-    {
-        title: 'Predicting Diabetes Risk with Machine Learning: A Cambridge Perspective',
-        description: 'Applying logistic regression and ensemble methods to the Pima Indians Diabetes Dataset, with insights from Cambridge D100 Fundamentals of Data Science.',
-        link: 'https://medium.com/',
-        date: 'Jan 2025',
-        readTime: '7 min read',
-    },
-    {
-        title: 'Building Your First LLM Agent with LangChain: A Practical Guide',
-        description: 'A step-by-step walkthrough of creating a custom LLM agent using LangChain — covering tools, memory, and chain-of-thought prompting.',
-        link: 'https://medium.com/',
-        date: 'Feb 2025',
-        readTime: '9 min read',
-    },
-    {
-        title: 'What Drives Airbnb Prices? Lessons from the Boston Dataset',
-        description: 'Exploratory data analysis and regression modelling to uncover the features that most influence listing prices in Boston's Airbnb market.',
-        link: 'https://medium.com/',
-        date: 'Mar 2025',
-        readTime: '6 min read',
-    },
-];
+document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('year').textContent = new Date().getFullYear();
+    configureMarked();
+    initMobileMenu();
+    initSearch();
+
+    try {
+        await loadManifest();
+    } catch (err) {
+        renderError('Could not load the notes index.', err);
+        return;
+    }
+
+    window.addEventListener('hashchange', router);
+    router();
+});
 
 /* -----------------------------------------------------------------------
-   CANVAS — PARTICLE NETWORK
+   MANIFEST
+   ----------------------------------------------------------------------- */
+async function loadManifest() {
+    const resp = await fetch(MANIFEST_URL, { cache: 'no-cache' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+
+    state.site = data.site || {};
+    state.categories = data.categories || [];
+    state.notes = (data.notes || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    state.byCategory = new Map(state.categories.map(c => [c.id, []]));
+    for (const note of state.notes) {
+        state.bySlug.set(note.slug, note);
+        if (!state.byCategory.has(note.category)) state.byCategory.set(note.category, []);
+        state.byCategory.get(note.category).push(note);
+        for (const tag of note.tags || []) {
+            state.tags.set(tag, (state.tags.get(tag) || 0) + 1);
+        }
+    }
+}
+
+/* -----------------------------------------------------------------------
+   ROUTER  —  #/                 home / curiosity map
+                #/<category>       category listing (work | study | personal)
+                #/note/<slug>      a single rendered note
+                #/tag/<tag>        notes filtered by a tag
+   ----------------------------------------------------------------------- */
+function router() {
+    const hash = (location.hash || '#/').replace(/^#\/?/, '');
+    const parts = hash.split('/').filter(Boolean);
+    setActiveNav(parts[0] || 'home');
+    window.scrollTo(0, 0);
+
+    if (parts.length === 0) return renderHome();
+    if (parts[0] === 'note') return renderNote(parts[1]);
+    if (parts[0] === 'tag') return renderTag(decodeURIComponent(parts[1] || ''));
+    if (state.byCategory.has(parts[0])) return renderCategory(parts[0]);
+
+    renderError('Page not found.', new Error(location.hash));
+}
+
+function setActiveNav(route) {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.toggle('active', link.dataset.route === route);
+    });
+}
+
+/* -----------------------------------------------------------------------
+   VIEW: HOME / CURIOSITY MAP
+   ----------------------------------------------------------------------- */
+function renderHome() {
+    const s = state.site;
+    const links = s.links || {};
+    const recent = state.notes.slice(0, 6);
+
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <header class="hero">
+            <canvas id="hero-canvas"></canvas>
+            <div class="hero-inner container">
+                <img class="hero-avatar" src="${attr(s.avatar)}" alt="${attr(s.name)}">
+                <h1>${esc(s.name)}<span class="gradient-text">.</span></h1>
+                <p class="hero-tagline">${esc(s.tagline)}</p>
+                <div class="hero-links">
+                    ${links.github ? socialLink(links.github, 'fab fa-github', 'GitHub') : ''}
+                    ${links.linkedin ? socialLink(links.linkedin, 'fab fa-linkedin', 'LinkedIn') : ''}
+                    ${links.medium ? socialLink(links.medium, 'fab fa-medium', 'Medium') : ''}
+                </div>
+            </div>
+        </header>
+
+        <section class="section container">
+            <h2 class="section-title">The <span class="gradient-text">Curiosity Map</span></h2>
+            <p class="section-subtitle">Three places my attention goes. Pick a thread.</p>
+            <div class="category-tiles">
+                ${state.categories.map(categoryTile).join('')}
+            </div>
+        </section>
+
+        <section class="section container">
+            <h2 class="section-title">Tag <span class="gradient-text">cloud</span></h2>
+            <p class="section-subtitle">Sized by how often a topic shows up.</p>
+            <div class="tag-cloud">${tagCloud()}</div>
+        </section>
+
+        <section class="section container">
+            <h2 class="section-title">Recently <span class="gradient-text">written</span></h2>
+            <div class="note-grid">
+                ${recent.map(noteCard).join('') || emptyMsg('No notes yet.')}
+            </div>
+        </section>
+    `;
+    initCanvas();
+}
+
+function categoryTile(cat) {
+    const count = (state.byCategory.get(cat.id) || []).length;
+    return `
+        <a class="category-tile" href="#/${esc(cat.id)}">
+            <div class="tile-icon">${esc(cat.icon || '📓')}</div>
+            <h3>${esc(cat.label)}</h3>
+            <p>${esc(cat.blurb || '')}</p>
+            <span class="tile-count">${count} note${count === 1 ? '' : 's'}</span>
+        </a>`;
+}
+
+function tagCloud() {
+    const tags = [...state.tags.entries()].sort((a, b) => b[1] - a[1]);
+    if (!tags.length) return emptyMsg('No tags yet.');
+    const max = tags[0][1];
+    return tags.map(([tag, count]) => {
+        const size = 0.85 + (count / max) * 0.9; // rem scale
+        return `<a class="tag-chip" style="font-size:${size.toFixed(2)}rem" href="#/tag/${encodeURIComponent(tag)}">#${esc(tag)}</a>`;
+    }).join('');
+}
+
+/* -----------------------------------------------------------------------
+   VIEW: CATEGORY
+   ----------------------------------------------------------------------- */
+function renderCategory(catId) {
+    const cat = state.categories.find(c => c.id === catId) || { label: catId, icon: '📓', blurb: '' };
+    const notes = state.byCategory.get(catId) || [];
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <section class="section container view-pad">
+            <div class="page-head">
+                <div class="page-head-icon">${esc(cat.icon || '📓')}</div>
+                <div>
+                    <h1 class="section-title left">${esc(cat.label)}</h1>
+                    <p class="section-subtitle left">${esc(cat.blurb || '')}</p>
+                </div>
+            </div>
+            <div class="note-grid">
+                ${notes.map(noteCard).join('') || emptyMsg('Nothing here yet — check back soon.')}
+            </div>
+        </section>`;
+}
+
+/* -----------------------------------------------------------------------
+   VIEW: TAG
+   ----------------------------------------------------------------------- */
+function renderTag(tag) {
+    const notes = state.notes.filter(n => (n.tags || []).includes(tag));
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <section class="section container view-pad">
+            <a class="back-link" href="#/"><i class="fas fa-arrow-left"></i> Home</a>
+            <h1 class="section-title left">#${esc(tag)}</h1>
+            <p class="section-subtitle left">${notes.length} note${notes.length === 1 ? '' : 's'} tagged.</p>
+            <div class="note-grid">
+                ${notes.map(noteCard).join('') || emptyMsg('No notes with this tag.')}
+            </div>
+        </section>`;
+}
+
+/* -----------------------------------------------------------------------
+   VIEW: SINGLE NOTE
+   ----------------------------------------------------------------------- */
+async function renderNote(slug) {
+    const note = state.bySlug.get(slug);
+    const app = document.getElementById('app');
+    if (!note) return renderError('Note not found.', new Error(slug));
+
+    app.innerHTML = `<div class="loading"><span class="spinner"></span> Loading note…</div>`;
+
+    let md;
+    try {
+        const resp = await fetch(note.file, { cache: 'no-cache' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        md = await resp.text();
+    } catch (err) {
+        return renderError('Could not load this note.', err);
+    }
+
+    const cat = state.categories.find(c => c.id === note.category);
+    const html = DOMPurify.sanitize(marked.parse(resolveWikiLinks(md)));
+
+    app.innerHTML = `
+        <article class="section container note view-pad">
+            <a class="back-link" href="#/${esc(note.category)}">
+                <i class="fas fa-arrow-left"></i> ${esc(cat ? cat.label : note.category)}
+            </a>
+            <div class="note-meta">
+                <span><i class="far fa-calendar"></i> ${esc(formatDate(note.date))}</span>
+                ${(note.tags || []).map(t => `<a class="tag-chip sm" href="#/tag/${encodeURIComponent(t)}">#${esc(t)}</a>`).join('')}
+            </div>
+            <div class="markdown-body">${html}</div>
+        </article>`;
+
+    app.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+}
+
+/* -----------------------------------------------------------------------
+   SEARCH (client-side over the manifest)
+   ----------------------------------------------------------------------- */
+function initSearch() {
+    const input = document.getElementById('search-input');
+    if (!input) return;
+    let panel = document.getElementById('search-panel');
+    if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'search-panel';
+        panel.className = 'search-panel';
+        document.querySelector('.nav-search').appendChild(panel);
+    }
+
+    const close = () => { panel.classList.remove('open'); panel.innerHTML = ''; };
+
+    input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        if (!q) return close();
+        const hits = state.notes.filter(n => {
+            const hay = `${n.title} ${n.summary} ${(n.tags || []).join(' ')} ${n.category}`.toLowerCase();
+            return hay.includes(q);
+        }).slice(0, 8);
+
+        panel.innerHTML = hits.length
+            ? hits.map(n => `
+                <a class="search-hit" href="#/note/${esc(n.slug)}">
+                    <strong>${esc(n.title)}</strong>
+                    <span>${esc(n.category)} · ${esc(n.summary || '')}</span>
+                </a>`).join('')
+            : `<div class="search-empty">No matches for "${esc(input.value)}"</div>`;
+        panel.classList.add('open');
+    });
+
+    panel.addEventListener('click', e => { if (e.target.closest('a')) { input.value = ''; close(); } });
+    document.addEventListener('click', e => { if (!e.target.closest('.nav-search')) close(); });
+}
+
+/* -----------------------------------------------------------------------
+   MOBILE MENU
+   ----------------------------------------------------------------------- */
+function initMobileMenu() {
+    const btn = document.getElementById('hamburger');
+    const links = document.getElementById('nav-links');
+    if (!btn || !links) return;
+    btn.addEventListener('click', () => {
+        const open = links.classList.toggle('open');
+        btn.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', open);
+    });
+    links.querySelectorAll('a').forEach(a =>
+        a.addEventListener('click', () => { links.classList.remove('open'); btn.classList.remove('open'); }));
+}
+
+/* -----------------------------------------------------------------------
+   CANVAS — particle network (home hero only)
    ----------------------------------------------------------------------- */
 function initCanvas() {
     const canvas = document.getElementById('hero-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-
     let W, H, particles;
-    const PARTICLE_COUNT = 60;
-    const MAX_DIST = 140;
+    const COUNT = 55, MAX_DIST = 140;
     const COLORS = ['#6366f1', '#818cf8', '#06b6d4', '#22d3ee'];
 
-    function resize() {
-        W = canvas.width  = canvas.offsetWidth;
-        H = canvas.height = canvas.offsetHeight;
-    }
-
-    function randomParticle() {
-        return {
-            x:   Math.random() * W,
-            y:   Math.random() * H,
-            vx:  (Math.random() - 0.5) * 0.4,
-            vy:  (Math.random() - 0.5) * 0.4,
-            r:   Math.random() * 1.8 + 0.8,
-            color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        };
-    }
-
-    function init() {
-        resize();
-        particles = Array.from({ length: PARTICLE_COUNT }, randomParticle);
-    }
+    const resize = () => { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; };
+    const rand = () => ({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 1.8 + 0.8, color: COLORS[(Math.random() * COLORS.length) | 0],
+    });
+    const init = () => { resize(); particles = Array.from({ length: COUNT }, rand); };
 
     function draw() {
+        if (!canvas.isConnected) return; // stop animating after navigating away
         ctx.clearRect(0, 0, W, H);
-
-        // Update positions
         for (const p of particles) {
-            p.x += p.vx;
-            p.y += p.vy;
+            p.x += p.vx; p.y += p.vy;
             if (p.x < 0 || p.x > W) p.vx *= -1;
             if (p.y < 0 || p.y > H) p.vy *= -1;
         }
-
-        // Draw connections
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
+                const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
+                const dist = Math.hypot(dx, dy);
                 if (dist < MAX_DIST) {
-                    const alpha = (1 - dist / MAX_DIST) * 0.35;
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(99,102,241,${alpha})`;
+                    ctx.strokeStyle = `rgba(99,102,241,${(1 - dist / MAX_DIST) * 0.35})`;
                     ctx.lineWidth = 0.8;
                     ctx.moveTo(particles[i].x, particles[i].y);
                     ctx.lineTo(particles[j].x, particles[j].y);
@@ -102,316 +328,78 @@ function initCanvas() {
                 }
             }
         }
-
-        // Draw particles
         for (const p of particles) {
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = 0.7;
-            ctx.fill();
-            ctx.globalAlpha = 1;
+            ctx.fillStyle = p.color; ctx.globalAlpha = 0.7; ctx.fill(); ctx.globalAlpha = 1;
         }
-
         requestAnimationFrame(draw);
     }
-
     init();
     draw();
-    window.addEventListener('resize', init);
+    window.addEventListener('resize', () => { if (canvas.isConnected) init(); });
 }
 
 /* -----------------------------------------------------------------------
-   TYPING ANIMATION
+   RENDER HELPERS
    ----------------------------------------------------------------------- */
-function initTyping() {
-    const el = document.getElementById('typed-text');
-    if (!el) return;
-
-    const phrases = [
-        'Data Scientist',
-        'Gen AI Engineer',
-        'Cambridge Researcher',
-        'Insight Analyst @ Vodafone',
-        'LLM Builder',
-    ];
-
-    let phraseIdx = 0;
-    let charIdx   = 0;
-    let deleting  = false;
-    let paused    = false;
-
-    function tick() {
-        const phrase = phrases[phraseIdx];
-
-        if (paused) return;
-
-        if (!deleting) {
-            el.textContent = phrase.slice(0, charIdx + 1);
-            charIdx++;
-            if (charIdx === phrase.length) {
-                paused = true;
-                setTimeout(() => { deleting = true; paused = false; tick(); }, 2000);
-                return;
-            }
-            setTimeout(tick, 70);
-        } else {
-            el.textContent = phrase.slice(0, charIdx - 1);
-            charIdx--;
-            if (charIdx === 0) {
-                deleting = false;
-                phraseIdx = (phraseIdx + 1) % phrases.length;
-                setTimeout(tick, 400);
-                return;
-            }
-            setTimeout(tick, 40);
-        }
-    }
-
-    tick();
+function noteCard(n) {
+    const cat = state.categories.find(c => c.id === n.category);
+    return `
+        <a class="note-card" href="#/note/${esc(n.slug)}">
+            <div class="note-card-cat">${esc(cat ? cat.icon : '📓')} ${esc(cat ? cat.label : n.category)}</div>
+            <h3>${esc(n.title)}</h3>
+            <p>${esc(n.summary || '')}</p>
+            <div class="note-card-foot">
+                <span class="note-date">${esc(formatDate(n.date))}</span>
+                <div class="note-card-tags">${(n.tags || []).slice(0, 3).map(t => `<span class="tag-chip sm">#${esc(t)}</span>`).join('')}</div>
+            </div>
+        </a>`;
 }
 
-/* -----------------------------------------------------------------------
-   NAVBAR — scroll behaviour & active link
-   ----------------------------------------------------------------------- */
-function initNavbar() {
-    const navbar = document.getElementById('navbar');
-    const links  = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('section[id]');
-
-    function onScroll() {
-        // Shrink navbar
-        navbar.classList.toggle('scrolled', window.scrollY > 20);
-
-        // Active link highlight
-        let current = '';
-        sections.forEach(sec => {
-            if (window.scrollY >= sec.offsetTop - 100) current = sec.id;
-        });
-        links.forEach(link => {
-            link.classList.toggle('active', link.getAttribute('href') === `#${current}`);
-        });
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+function socialLink(href, icon, label) {
+    return `<a class="hero-link" href="${attr(href)}" target="_blank" rel="noopener"><i class="${icon}"></i> ${esc(label)}</a>`;
 }
 
-/* -----------------------------------------------------------------------
-   MOBILE MENU
-   ----------------------------------------------------------------------- */
-function initMobileMenu() {
-    const btn   = document.getElementById('hamburger');
-    const links = document.getElementById('nav-links');
+function renderError(msg, err) {
+    console.error(msg, err);
+    document.getElementById('app').innerHTML = `
+        <section class="section container view-pad">
+            <div class="error-box">
+                <h1>🤔 ${esc(msg)}</h1>
+                <p>If you're opening the file directly, run a local server instead — <code>fetch</code> needs HTTP:</p>
+                <pre><code>python3 -m http.server 8000</code></pre>
+                <a class="back-link" href="#/"><i class="fas fa-arrow-left"></i> Back home</a>
+            </div>
+        </section>`;
+}
 
-    btn.addEventListener('click', () => {
-        const open = links.classList.toggle('open');
-        btn.classList.toggle('open', open);
-        btn.setAttribute('aria-expanded', open);
-    });
+function emptyMsg(text) { return `<p class="empty-msg">${esc(text)}</p>`; }
 
-    // Close when a link is clicked
-    links.querySelectorAll('a').forEach(a => {
-        a.addEventListener('click', () => {
-            links.classList.remove('open');
-            btn.classList.remove('open');
-        });
+/* Turn [[slug]] into links to the matching note (falls back to plain text). */
+function resolveWikiLinks(md) {
+    return md.replace(/\[\[([^\]]+)\]\]/g, (m, slug) => {
+        const key = slug.trim();
+        const note = state.bySlug.get(key);
+        return note ? `[${note.title}](#/note/${key})` : `**${key}**`;
     });
 }
 
-/* -----------------------------------------------------------------------
-   SCROLL REVEAL
-   ----------------------------------------------------------------------- */
-function initReveal() {
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry, i) => {
-                if (entry.isIntersecting) {
-                    // Stagger delay for grid children
-                    const delay = (entry.target.dataset.delay || 0);
-                    setTimeout(() => entry.target.classList.add('visible'), delay);
-                    observer.unobserve(entry.target);
-                }
-            });
-        },
-        { threshold: 0.1 }
-    );
-
-    document.querySelectorAll('.reveal').forEach((el, i) => {
-        // Stagger siblings in same parent
-        const siblings = el.parentElement.querySelectorAll('.reveal');
-        const idx = Array.from(siblings).indexOf(el);
-        el.dataset.delay = idx * 80;
-        observer.observe(el);
-    });
+function configureMarked() {
+    if (window.marked) marked.setOptions({ breaks: false, gfm: true });
 }
 
-/* -----------------------------------------------------------------------
-   ARTICLES — CAROUSEL
-   ----------------------------------------------------------------------- */
-const BANNER_GRADIENTS = [
-    'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-    'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)',
-    'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
-    'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
-    'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
-    'linear-gradient(135deg, #14b8a6 0%, #3b82f6 100%)',
-    'linear-gradient(135deg, #f97316 0%, #6366f1 100%)',
-    'linear-gradient(135deg, #a855f7 0%, #06b6d4 100%)',
-];
-
-async function loadArticles() {
-    const wrapper    = document.getElementById('articles-carousel');
-    const track      = document.getElementById('carousel-track');
-    const dotsEl     = document.getElementById('carousel-dots');
-    const counterEl  = document.getElementById('carousel-counter');
-    const profileLink = document.getElementById('medium-profile-link');
-    const contactLink = document.getElementById('medium-contact-link');
-    if (!track) return;
-
-    let articles = STATIC_ARTICLES;
-
-    if (CONFIG.mediumUsername) {
-        const rssUrl = `https://medium.com/feed/${CONFIG.mediumUsername}`;
-        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=8`;
-        try {
-            const resp = await fetch(apiUrl);
-            const data = await resp.json();
-            if (data.status === 'ok' && data.items?.length) {
-                const mediumBase = `https://medium.com/${CONFIG.mediumUsername}`;
-                if (profileLink) profileLink.href = mediumBase;
-                if (contactLink) contactLink.href = mediumBase;
-                articles = data.items.map(item => ({
-                    title:       item.title,
-                    description: item.description?.replace(/<[^>]+>/g, '').slice(0, 280) + '…',
-                    link:        item.link,
-                    date:        new Date(item.pubDate).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
-                    readTime:    estimateReadTime(item.description || ''),
-                    thumbnail:   item.thumbnail || item.enclosure?.link || '',
-                    categories:  (item.categories || []).slice(0, 3),
-                }));
-            }
-        } catch (_) { /* static fallback */ }
-    }
-
-    // Build slides
-    track.innerHTML = articles.map((a, i) => {
-        const grad = BANNER_GRADIENTS[i % BANNER_GRADIENTS.length];
-        const banner = a.thumbnail
-            ? `<img src="${a.thumbnail}" alt="" loading="lazy"><div class="banner-overlay"></div>`
-            : `<div class="carousel-banner-gradient" style="background:${grad}"></div>`;
-        const tags = (a.categories || [])
-            .map(c => `<span class="tag tag-ai">${escapeHtml(c)}</span>`).join('');
-
-        return `
-            <div class="carousel-slide">
-                <div class="carousel-card">
-                    <div class="carousel-card-banner">
-                        ${banner}
-                        <div class="carousel-card-num">${String(i + 1).padStart(2, '0')}</div>
-                    </div>
-                    <div class="carousel-card-content">
-                        <div class="carousel-meta">
-                            <i class="fab fa-medium"></i>
-                            <span>${a.date}</span>
-                            <span>&middot;</span>
-                            <span>${a.readTime}</span>
-                        </div>
-                        ${tags ? `<div class="carousel-tags">${tags}</div>` : ''}
-                        <h3>${escapeHtml(a.title)}</h3>
-                        <p>${escapeHtml(a.description)}</p>
-                        <a href="${a.link}" target="_blank" rel="noopener" class="carousel-read-btn">
-                            Read on Medium <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>`;
-    }).join('');
-
-    const total = articles.length;
-
-    // Dots
-    dotsEl.innerHTML = articles.map((_, i) =>
-        `<button class="carousel-dot${i === 0 ? ' active' : ''}" data-idx="${i}" aria-label="Article ${i + 1}"></button>`
-    ).join('');
-
-    if (counterEl) counterEl.textContent = `1 / ${total}`;
-
-    // State
-    let current = 0;
-    let autoTimer;
-
-    function goTo(idx) {
-        current = ((idx % total) + total) % total;
-        track.style.transform = `translateX(-${current * 100}%)`;
-        dotsEl.querySelectorAll('.carousel-dot').forEach((d, i) =>
-            d.classList.toggle('active', i === current));
-        if (counterEl) counterEl.textContent = `${current + 1} / ${total}`;
-    }
-
-    const startAuto = () => { autoTimer = setInterval(() => goTo(current + 1), 6000); };
-    const stopAuto  = () => clearInterval(autoTimer);
-
-    document.getElementById('carousel-prev').addEventListener('click', () => { stopAuto(); goTo(current - 1); startAuto(); });
-    document.getElementById('carousel-next').addEventListener('click', () => { stopAuto(); goTo(current + 1); startAuto(); });
-
-    dotsEl.addEventListener('click', e => {
-        const idx = e.target.dataset.idx;
-        if (idx !== undefined) { stopAuto(); goTo(+idx); startAuto(); }
-    });
-
-    // Touch swipe
-    let tx = 0;
-    wrapper.addEventListener('touchstart', e => { tx = e.changedTouches[0].clientX; }, { passive: true });
-    wrapper.addEventListener('touchend',   e => {
-        const dx = e.changedTouches[0].clientX - tx;
-        if (Math.abs(dx) > 50) { stopAuto(); goTo(dx < 0 ? current + 1 : current - 1); startAuto(); }
-    });
-
-    wrapper.addEventListener('mouseenter', stopAuto);
-    wrapper.addEventListener('mouseleave', startAuto);
-
-    startAuto();
+function formatDate(d) {
+    if (!d) return '';
+    const date = new Date(d);
+    return isNaN(date) ? d : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function estimateReadTime(html) {
-    const words = html.replace(/<[^>]+>/g, '').split(/\s+/).length;
-    const mins  = Math.max(1, Math.ceil(words / 200));
-    return `${mins} min read`;
+function esc(str = '') {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-
-function escapeHtml(str = '') {
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+/* For href/src attributes — block javascript: and other risky schemes. */
+function attr(url = '') {
+    const s = String(url).trim();
+    return /^(https?:|mailto:|\/|#|data:image\/)/i.test(s) ? esc(s) : '#';
 }
-
-/* -----------------------------------------------------------------------
-   SMOOTH SCROLL for anchor links
-   ----------------------------------------------------------------------- */
-function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-        a.addEventListener('click', e => {
-            const target = document.querySelector(a.getAttribute('href'));
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth' });
-            }
-        });
-    });
-}
-
-/* -----------------------------------------------------------------------
-   INIT
-   ----------------------------------------------------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
-    initCanvas();
-    initTyping();
-    initNavbar();
-    initMobileMenu();
-    initReveal();
-    initSmoothScroll();
-    loadArticles();
-});

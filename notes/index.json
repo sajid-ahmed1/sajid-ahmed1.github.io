@@ -1,0 +1,46 @@
+{
+  "site": {
+    "name": "Sajid Ahmed",
+    "tagline": "My second brain — a public wiki of notes, ideas, and a map of my curiosity.",
+    "avatar": "https://avatars.githubusercontent.com/u/69683657?v=4",
+    "links": {
+      "github": "https://github.com/sajid-ahmed1",
+      "linkedin": "https://www.linkedin.com/in/sajid-ahmed-b110a014a/",
+      "medium": "https://medium.com/@sajid.ahmed"
+    }
+  },
+  "categories": [
+    { "id": "work", "label": "Work", "icon": "💼", "blurb": "Data science, Gen AI, and engineering notes from the job and side projects." },
+    { "id": "study", "label": "Study", "icon": "🎓", "blurb": "Things I'm learning — Cambridge coursework, papers, courses, and concepts." },
+    { "id": "personal", "label": "Personal", "icon": "🌱", "blurb": "Curiosities, reflections, books, and everything that doesn't fit a box." }
+  ],
+  "notes": [
+    {
+      "slug": "building-rag-pipelines",
+      "title": "Building RAG pipelines that actually retrieve",
+      "category": "work",
+      "tags": ["llm", "rag", "vector-db", "embeddings"],
+      "date": "2026-06-20",
+      "summary": "Hard-won notes on chunking, embedding choice, and why naive cosine search disappoints.",
+      "file": "notes/work/building-rag-pipelines.md"
+    },
+    {
+      "slug": "logistic-regression-intuition",
+      "title": "Logistic regression: the intuition I wish I'd had first",
+      "category": "study",
+      "tags": ["machine-learning", "statistics", "cambridge"],
+      "date": "2026-06-18",
+      "summary": "Log-odds, the sigmoid, and why it's a linear model wearing a curvy coat.",
+      "file": "notes/study/logistic-regression-intuition.md"
+    },
+    {
+      "slug": "how-i-take-notes",
+      "title": "How I take notes (and why this site exists)",
+      "category": "personal",
+      "tags": ["meta", "productivity", "second-brain"],
+      "date": "2026-06-24",
+      "summary": "The system behind this wiki — capture, connect, and curate in public.",
+      "file": "notes/personal/how-i-take-notes.md"
+    }
+  ]
+}
