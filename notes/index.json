@@ -11,7 +11,12 @@
     "popup": {
       "topic": "building LLM agents with LangChain",
       "link": "https://medium.com/@sajid.ahmed"
-    }
+    },
+    "widgets": [
+      { "src": "images/widget-1.svg", "caption": "Sample 1" },
+      { "src": "images/widget-2.svg", "caption": "Sample 2" },
+      { "src": "images/widget-3.svg", "caption": "Sample 3" }
+    ]
   },
   "categories": [
     { "id": "work", "label": "Work", "icon": "💼", "blurb": "Data science, Gen AI, and engineering notes from the job and side projects." },

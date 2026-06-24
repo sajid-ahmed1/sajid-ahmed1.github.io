@@ -42,9 +42,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     buildDesktopIcons();
     buildStartMenu();
+    buildWidgets();
     openAbout();                          // friendly welcome window
     setTimeout(initFakeVirus, 1800);      // the "totally legitimate" alert :)
 });
+
+/* Touch devices report a "coarse" pointer — open on a single tap there. */
+const COARSE = window.matchMedia('(pointer: coarse)').matches;
 
 /* -----------------------------------------------------------------------
    MANIFEST
@@ -86,13 +90,42 @@ function buildDesktopIcons() {
         const el = document.createElement('button');
         el.className = 'desktop-icon';
         el.innerHTML = `<span class="di-glyph">${def.icon}</span><span class="di-label">${esc(def.label)}</span>`;
-        // single-click selects, double-click opens (authentic Win98)
-        el.addEventListener('click', () => {
-            host.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
-            el.classList.add('selected');
-        });
-        el.addEventListener('dblclick', def.action);
+        if (COARSE) {
+            // touch: a single tap opens
+            el.addEventListener('click', def.action);
+        } else {
+            // desktop: single-click selects, double-click opens (authentic Win98)
+            el.addEventListener('click', () => {
+                host.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+                el.classList.add('selected');
+            });
+            el.addEventListener('dblclick', def.action);
+        }
         host.appendChild(el);
+    });
+}
+
+/* -----------------------------------------------------------------------
+   DESKTOP WIDGETS — draggable Win98 photo frames (data-driven, decorative).
+   Swap the images by editing the files in /images or `site.widgets`.
+   ----------------------------------------------------------------------- */
+function buildWidgets() {
+    const widgets = (state.site && state.site.widgets) || [];
+    const host = document.getElementById('desktop');
+    const spots = [['67%', '13%'], ['80%', '45%'], ['58%', '64%']]; // scattered, right side
+
+    widgets.forEach((w, i) => {
+        if (!w.src) return;
+        const el = document.createElement('div');
+        el.className = 'desktop-widget';
+        const pos = spots[i] || [(Math.random() * 55 + 30) + '%', (Math.random() * 60 + 10) + '%'];
+        el.style.left = w.x || pos[0];
+        el.style.top = w.y || pos[1];
+        el.innerHTML = `
+            <div class="widget-frame"><img src="${attr(w.src)}" alt="${attr(w.caption || '')}" draggable="false"></div>
+            ${w.caption ? `<div class="widget-caption">${esc(w.caption)}</div>` : ''}`;
+        host.appendChild(el);
+        makeDraggable(el, el);
     });
 }
 
@@ -236,23 +269,33 @@ function closeWindow(id) {
     openWindows.delete(id);
 }
 
-function makeDraggable(win, handle) {
-    let sx, sy, ox, oy, dragging = false;
-    handle.addEventListener('mousedown', e => {
+/* Pointer Events → works for both mouse and touch. */
+function makeDraggable(el, handle) {
+    let sx, sy, ox, oy, dragging = false, pid = null;
+    handle.addEventListener('pointerdown', e => {
         if (e.target.closest('.title-bar-controls')) return;
-        dragging = true;
+        dragging = true; pid = e.pointerId;
         sx = e.clientX; sy = e.clientY;
-        ox = win.offsetLeft; oy = win.offsetTop;
+        ox = el.offsetLeft; oy = el.offsetTop;
+        el.style.transform = 'none';      // drop any centering transform once moved
+        try { handle.setPointerCapture(pid); } catch (_) {}
         document.body.style.userSelect = 'none';
     });
-    window.addEventListener('mousemove', e => {
+    handle.addEventListener('pointermove', e => {
         if (!dragging) return;
-        const nx = Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - 80));
-        const ny = Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - 60));
-        win.style.left = nx + 'px';
-        win.style.top = ny + 'px';
+        const nx = Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - 60));
+        const ny = Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - 50));
+        el.style.left = nx + 'px';
+        el.style.top = ny + 'px';
     });
-    window.addEventListener('mouseup', () => { dragging = false; document.body.style.userSelect = ''; });
+    const end = () => {
+        if (!dragging) return;
+        dragging = false;
+        document.body.style.userSelect = '';
+        try { handle.releasePointerCapture(pid); } catch (_) {}
+    };
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
 }
 
 /* =======================================================================

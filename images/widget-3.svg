@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <defs>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16a085"/>
+      <stop offset="1" stop-color="#0a4d3c"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" fill="url(#g3)"/>
+  <polyline points="40,160 80,120 110,140 150,90 200,110" fill="none" stroke="#ffffff" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="40" cy="160" r="7" fill="#ffe680"/>
+  <circle cx="150" cy="90" r="7" fill="#ffe680"/>
+  <circle cx="200" cy="110" r="7" fill="#ffe680"/>
+  <text x="120" y="225" font-family="Tahoma, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" opacity="0.85">Sample 3 · replace me</text>
+</svg>
