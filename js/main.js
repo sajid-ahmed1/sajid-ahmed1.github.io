@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.addEventListener('hashchange', router);
     router();
+
+    // The "totally legitimate" system alert :)
+    setTimeout(initFakeVirus, 1500);
 });
 
 /* -----------------------------------------------------------------------
@@ -99,7 +102,6 @@ function renderHome() {
     const app = document.getElementById('app');
     app.innerHTML = `
         <header class="hero">
-            <canvas id="hero-canvas"></canvas>
             <div class="hero-inner container">
                 <img class="hero-avatar" src="${attr(s.avatar)}" alt="${attr(s.name)}">
                 <h1>${esc(s.name)}<span class="gradient-text">.</span></h1>
@@ -133,7 +135,6 @@ function renderHome() {
             </div>
         </section>
     `;
-    initCanvas();
 }
 
 function categoryTile(cat) {
@@ -288,56 +289,58 @@ function initMobileMenu() {
 }
 
 /* -----------------------------------------------------------------------
-   CANVAS — particle network (home hero only)
+   FAKE "VIRUS" POPUP — a tongue-in-cheek Win98 alert plugging Medium.
+   Closing it spawns another at a random spot (classic gag), capped so it
+   never becomes genuinely annoying.
    ----------------------------------------------------------------------- */
-function initCanvas() {
-    const canvas = document.getElementById('hero-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let W, H, particles;
-    const COUNT = 55, MAX_DIST = 140;
-    const COLORS = ['#6366f1', '#818cf8', '#06b6d4', '#22d3ee'];
+const MAX_POPUPS = 4;
+let popupCount = 0;
 
-    const resize = () => { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; };
-    const rand = () => ({
-        x: Math.random() * W, y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
-        r: Math.random() * 1.8 + 0.8, color: COLORS[(Math.random() * COLORS.length) | 0],
-    });
-    const init = () => { resize(); particles = Array.from({ length: COUNT }, rand); };
+function initFakeVirus() {
+    const popup = state.site && state.site.popup;
+    if (!popup || !popup.topic) return;
+    spawnPopup(popup);
+}
 
-    function draw() {
-        if (!canvas.isConnected) return; // stop animating after navigating away
-        ctx.clearRect(0, 0, W, H);
-        for (const p of particles) {
-            p.x += p.vx; p.y += p.vy;
-            if (p.x < 0 || p.x > W) p.vx *= -1;
-            if (p.y < 0 || p.y > H) p.vy *= -1;
-        }
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
-                const dist = Math.hypot(dx, dy);
-                if (dist < MAX_DIST) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = `rgba(99,102,241,${(1 - dist / MAX_DIST) * 0.35})`;
-                    ctx.lineWidth = 0.8;
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.stroke();
-                }
-            }
-        }
-        for (const p of particles) {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = p.color; ctx.globalAlpha = 0.7; ctx.fill(); ctx.globalAlpha = 1;
-        }
-        requestAnimationFrame(draw);
-    }
-    init();
-    draw();
-    window.addEventListener('resize', () => { if (canvas.isConnected) init(); });
+function spawnPopup(popup) {
+    popupCount++;
+    const link = attr(popup.link || (state.site.links && state.site.links.medium) || '#');
+
+    const el = document.createElement('div');
+    el.className = 'win98-popup';
+    // Random-ish position so multiples scatter across the screen.
+    const x = popupCount === 1 ? 50 : Math.random() * 60 + 5;   // vw
+    const y = popupCount === 1 ? 50 : Math.random() * 50 + 10;  // vh
+    el.style.left = popupCount === 1 ? '50%' : `${x}vw`;
+    el.style.top = popupCount === 1 ? '38%' : `${y}vh`;
+    if (popupCount === 1) el.style.transform = 'translate(-50%, -50%)';
+
+    el.innerHTML = `
+        <div class="win98-titlebar">
+            <span><i class="fas fa-triangle-exclamation"></i> System Alert</span>
+            <button class="win98-x" aria-label="Close">✕</button>
+        </div>
+        <div class="win98-body">
+            <div class="win98-icon">⚠️</div>
+            <div class="win98-text">
+                <p><strong>WARNING:</strong> Your curiosity may be at risk!</p>
+                <p>Check my latest Medium post on <strong>${esc(popup.topic)}</strong>.</p>
+            </div>
+        </div>
+        <div class="win98-actions">
+            <a class="win98-btn win98-primary" href="${link}" target="_blank" rel="noopener">Read it!</a>
+            <button class="win98-btn win98-close">Close</button>
+        </div>`;
+
+    document.body.appendChild(el);
+
+    const remove = (spawnNext) => {
+        el.remove();
+        if (spawnNext && popupCount < MAX_POPUPS) spawnPopup(popup);
+    };
+    el.querySelector('.win98-x').addEventListener('click', () => remove(true));
+    el.querySelector('.win98-close').addEventListener('click', () => remove(true));
+    el.querySelector('.win98-primary').addEventListener('click', () => remove(false));
 }
 
 /* -----------------------------------------------------------------------

@@ -7,6 +7,10 @@
       "github": "https://github.com/sajid-ahmed1",
       "linkedin": "https://www.linkedin.com/in/sajid-ahmed-b110a014a/",
       "medium": "https://medium.com/@sajid.ahmed"
+    },
+    "popup": {
+      "topic": "building LLM agents with LangChain",
+      "link": "https://medium.com/@sajid.ahmed"
     }
   },
   "categories": [
