@@ -1,15 +1,15 @@
 /* =====================================================================
-   SAJID AHMED — SECOND BRAIN
-   A no-build, client-side wiki. Notes are markdown files in /notes,
-   indexed by /notes/index.json. This script loads the manifest, routes
-   on the URL hash, and renders markdown in the browser.
+   SAJID AHMED — SECOND BRAIN 98
+   A no-build, client-side wiki dressed as a Windows 98 desktop.
+   Notes are markdown in /notes, indexed by /notes/index.json. Categories
+   and notes open as draggable windows; a taskbar + Start menu drive it.
    ===================================================================== */
 
 'use strict';
 
 const MANIFEST_URL = 'notes/index.json';
 
-/* App state — populated once from the manifest, then read by the router. */
+/* App state — loaded once from the manifest. */
 const state = {
     site: null,
     categories: [],
@@ -19,27 +19,31 @@ const state = {
     tags: new Map(), // tag -> count
 };
 
+/* Window manager state. */
+const openWindows = new Map(); // id -> { el, taskBtn }
+let zCounter = 10;
+
 /* -----------------------------------------------------------------------
    BOOT
    ----------------------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
-    document.getElementById('year').textContent = new Date().getFullYear();
     configureMarked();
-    initMobileMenu();
-    initSearch();
+    startClock();
+    initStartButton();
+    initLinkRouting();
 
     try {
         await loadManifest();
     } catch (err) {
-        renderError('Could not load the notes index.', err);
+        openWindow('error', { title: 'Error', icon: '⚠️', body: errorBody('Could not load the notes index.') });
+        console.error(err);
         return;
     }
 
-    window.addEventListener('hashchange', router);
-    router();
-
-    // The "totally legitimate" system alert :)
-    setTimeout(initFakeVirus, 1500);
+    buildDesktopIcons();
+    buildStartMenu();
+    openAbout();                          // friendly welcome window
+    setTimeout(initFakeVirus, 1800);      // the "totally legitimate" alert :)
 });
 
 /* -----------------------------------------------------------------------
@@ -59,153 +63,271 @@ async function loadManifest() {
         state.bySlug.set(note.slug, note);
         if (!state.byCategory.has(note.category)) state.byCategory.set(note.category, []);
         state.byCategory.get(note.category).push(note);
-        for (const tag of note.tags || []) {
-            state.tags.set(tag, (state.tags.get(tag) || 0) + 1);
-        }
+        for (const tag of note.tags || []) state.tags.set(tag, (state.tags.get(tag) || 0) + 1);
     }
 }
 
 /* -----------------------------------------------------------------------
-   ROUTER  —  #/                 home / curiosity map
-                #/<category>       category listing (work | study | personal)
-                #/note/<slug>      a single rendered note
-                #/tag/<tag>        notes filtered by a tag
+   DESKTOP ICONS
    ----------------------------------------------------------------------- */
-function router() {
-    const hash = (location.hash || '#/').replace(/^#\/?/, '');
-    const parts = hash.split('/').filter(Boolean);
-    setActiveNav(parts[0] || 'home');
-    window.scrollTo(0, 0);
+function buildDesktopIcons() {
+    const icons = [
+        { id: 'about',    icon: '👤', label: 'About Me',    action: openAbout },
+        { id: 'notes',    icon: '🗂️', label: 'My Notes',    action: openExplorer },
+        ...state.categories.map(c => ({
+            id: 'cat-' + c.id, icon: c.icon || '📁', label: c.label, action: () => openCategoryWindow(c.id),
+        })),
+        { id: 'recycle',  icon: '🗑️', label: 'Recycle Bin', action: openRecycleBin },
+    ];
 
-    if (parts.length === 0) return renderHome();
-    if (parts[0] === 'note') return renderNote(parts[1]);
-    if (parts[0] === 'tag') return renderTag(decodeURIComponent(parts[1] || ''));
-    if (state.byCategory.has(parts[0])) return renderCategory(parts[0]);
-
-    renderError('Page not found.', new Error(location.hash));
-}
-
-function setActiveNav(route) {
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.toggle('active', link.dataset.route === route);
+    const host = document.getElementById('desktop-icons');
+    host.innerHTML = '';
+    icons.forEach(def => {
+        const el = document.createElement('button');
+        el.className = 'desktop-icon';
+        el.innerHTML = `<span class="di-glyph">${def.icon}</span><span class="di-label">${esc(def.label)}</span>`;
+        // single-click selects, double-click opens (authentic Win98)
+        el.addEventListener('click', () => {
+            host.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+        });
+        el.addEventListener('dblclick', def.action);
+        host.appendChild(el);
     });
 }
 
 /* -----------------------------------------------------------------------
-   VIEW: HOME / CURIOSITY MAP
+   START MENU
    ----------------------------------------------------------------------- */
-function renderHome() {
-    const s = state.site;
-    const links = s.links || {};
-    const recent = state.notes.slice(0, 6);
-
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <header class="hero">
-            <div class="hero-inner container">
-                <img class="hero-avatar" src="${attr(s.avatar)}" alt="${attr(s.name)}">
-                <h1>${esc(s.name)}<span class="gradient-text">.</span></h1>
-                <p class="hero-tagline">${esc(s.tagline)}</p>
-                <div class="hero-links">
-                    ${links.github ? socialLink(links.github, 'fab fa-github', 'GitHub') : ''}
-                    ${links.linkedin ? socialLink(links.linkedin, 'fab fa-linkedin', 'LinkedIn') : ''}
-                    ${links.medium ? socialLink(links.medium, 'fab fa-medium', 'Medium') : ''}
-                </div>
-            </div>
-        </header>
-
-        <section class="section container">
-            <h2 class="section-title">The <span class="gradient-text">Curiosity Map</span></h2>
-            <p class="section-subtitle">Three places my attention goes. Pick a thread.</p>
-            <div class="category-tiles">
-                ${state.categories.map(categoryTile).join('')}
-            </div>
-        </section>
-
-        <section class="section container">
-            <h2 class="section-title">Tag <span class="gradient-text">cloud</span></h2>
-            <p class="section-subtitle">Sized by how often a topic shows up.</p>
-            <div class="tag-cloud">${tagCloud()}</div>
-        </section>
-
-        <section class="section container">
-            <h2 class="section-title">Recently <span class="gradient-text">written</span></h2>
-            <div class="note-grid">
-                ${recent.map(noteCard).join('') || emptyMsg('No notes yet.')}
-            </div>
-        </section>
-    `;
+function initStartButton() {
+    const btn = document.getElementById('start-btn');
+    const menu = document.getElementById('start-menu');
+    btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = menu.classList.toggle('hidden');
+        btn.classList.toggle('pressed', !open);
+    });
+    document.addEventListener('click', e => {
+        if (!menu.classList.contains('hidden') && !e.target.closest('#start-menu') && !e.target.closest('#start-btn')) {
+            menu.classList.add('hidden');
+            btn.classList.remove('pressed');
+        }
+    });
 }
 
-function categoryTile(cat) {
-    const count = (state.byCategory.get(cat.id) || []).length;
-    return `
-        <a class="category-tile" href="#/${esc(cat.id)}">
-            <div class="tile-icon">${esc(cat.icon || '📓')}</div>
-            <h3>${esc(cat.label)}</h3>
-            <p>${esc(cat.blurb || '')}</p>
-            <span class="tile-count">${count} note${count === 1 ? '' : 's'}</span>
-        </a>`;
-}
+function buildStartMenu() {
+    const items = [
+        { icon: '👤', label: 'About Me', action: openAbout },
+        { icon: '🗂️', label: 'My Notes', action: openExplorer },
+        { sep: true },
+        ...state.categories.map(c => ({ icon: c.icon || '📁', label: c.label, action: () => openCategoryWindow(c.id) })),
+        { sep: true },
+        { icon: '🔍', label: 'Find Notes…', action: () => { openExplorer(); const i = document.getElementById('explorer-search'); if (i) i.focus(); } },
+        { icon: '⏻', label: 'Shut Down…', action: openShutDown },
+    ];
 
-function tagCloud() {
-    const tags = [...state.tags.entries()].sort((a, b) => b[1] - a[1]);
-    if (!tags.length) return emptyMsg('No tags yet.');
-    const max = tags[0][1];
-    return tags.map(([tag, count]) => {
-        const size = 0.85 + (count / max) * 0.9; // rem scale
-        return `<a class="tag-chip" style="font-size:${size.toFixed(2)}rem" href="#/tag/${encodeURIComponent(tag)}">#${esc(tag)}</a>`;
-    }).join('');
+    const list = document.getElementById('start-list');
+    list.innerHTML = '';
+    items.forEach(it => {
+        const li = document.createElement('li');
+        if (it.sep) { li.className = 'start-sep'; list.appendChild(li); return; }
+        li.className = 'start-item';
+        li.innerHTML = `<span class="si-glyph">${it.icon}</span> ${esc(it.label)}`;
+        li.addEventListener('click', () => {
+            document.getElementById('start-menu').classList.add('hidden');
+            document.getElementById('start-btn').classList.remove('pressed');
+            it.action();
+        });
+        list.appendChild(li);
+    });
 }
 
 /* -----------------------------------------------------------------------
-   VIEW: CATEGORY
+   IN-CONTENT LINK ROUTING  (#/note/x, #/<cat>, #/tag/x — incl. wiki-links)
    ----------------------------------------------------------------------- */
-function renderCategory(catId) {
-    const cat = state.categories.find(c => c.id === catId) || { label: catId, icon: '📓', blurb: '' };
+function initLinkRouting() {
+    document.addEventListener('click', e => {
+        const a = e.target.closest('a[href^="#/"]');
+        if (!a) return;
+        e.preventDefault();
+        const parts = a.getAttribute('href').replace(/^#\/?/, '').split('/').filter(Boolean);
+        if (!parts.length) return openAbout();
+        if (parts[0] === 'note') return openNoteWindow(parts[1]);
+        if (parts[0] === 'tag') return openTagWindow(decodeURIComponent(parts[1] || ''));
+        if (state.byCategory.has(parts[0])) return openCategoryWindow(parts[0]);
+    });
+}
+
+/* =======================================================================
+   WINDOW MANAGER
+   ======================================================================= */
+function openWindow(id, { title, icon, body, width }) {
+    if (openWindows.has(id)) return focusWindow(id);
+
+    const win = document.createElement('div');
+    win.className = 'window';
+    win.style.zIndex = ++zCounter;
+    if (width) win.style.width = width;
+    const n = openWindows.size;
+    win.style.left = Math.min(60 + n * 26, window.innerWidth - 320) + 'px';
+    win.style.top = Math.min(40 + n * 26, window.innerHeight - 260) + 'px';
+
+    win.innerHTML = `
+        <div class="title-bar">
+            <span class="title-bar-text">${icon || ''} ${esc(title)}</span>
+            <div class="title-bar-controls">
+                <button class="tb-btn tb-min" aria-label="Minimize">_</button>
+                <button class="tb-btn tb-close" aria-label="Close">✕</button>
+            </div>
+        </div>
+        <div class="window-body">${body}</div>`;
+    document.getElementById('windows').appendChild(win);
+
+    const taskBtn = document.createElement('button');
+    taskBtn.className = 'task-btn';
+    taskBtn.innerHTML = `${icon || ''} ${esc(title)}`;
+    taskBtn.addEventListener('click', () => toggleWindow(id));
+    document.getElementById('task-buttons').appendChild(taskBtn);
+
+    openWindows.set(id, { el: win, taskBtn });
+
+    win.addEventListener('mousedown', () => focusWindow(id));
+    win.querySelector('.tb-close').addEventListener('click', e => { e.stopPropagation(); closeWindow(id); });
+    win.querySelector('.tb-min').addEventListener('click', e => { e.stopPropagation(); minimizeWindow(id); });
+    makeDraggable(win, win.querySelector('.title-bar'));
+
+    win.querySelectorAll('pre code').forEach(b => { try { hljs.highlightElement(b); } catch (_) {} });
+    focusWindow(id);
+    return win;
+}
+
+function focusWindow(id) {
+    const rec = openWindows.get(id);
+    if (!rec) return;
+    rec.el.style.display = 'flex';
+    rec.el.style.zIndex = ++zCounter;
+    rec.el.classList.remove('minimized');
+    for (const [, r] of openWindows) {
+        r.el.classList.toggle('inactive', r !== rec);
+        r.taskBtn.classList.toggle('active', r === rec);
+    }
+}
+
+function minimizeWindow(id) {
+    const rec = openWindows.get(id);
+    if (!rec) return;
+    rec.el.style.display = 'none';
+    rec.taskBtn.classList.remove('active');
+}
+
+function toggleWindow(id) {
+    const rec = openWindows.get(id);
+    if (!rec) return;
+    const hidden = rec.el.style.display === 'none';
+    const focused = rec.taskBtn.classList.contains('active');
+    if (hidden || !focused) focusWindow(id); else minimizeWindow(id);
+}
+
+function closeWindow(id) {
+    const rec = openWindows.get(id);
+    if (!rec) return;
+    rec.el.remove();
+    rec.taskBtn.remove();
+    openWindows.delete(id);
+}
+
+function makeDraggable(win, handle) {
+    let sx, sy, ox, oy, dragging = false;
+    handle.addEventListener('mousedown', e => {
+        if (e.target.closest('.title-bar-controls')) return;
+        dragging = true;
+        sx = e.clientX; sy = e.clientY;
+        ox = win.offsetLeft; oy = win.offsetTop;
+        document.body.style.userSelect = 'none';
+    });
+    window.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        const nx = Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - 80));
+        const ny = Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - 60));
+        win.style.left = nx + 'px';
+        win.style.top = ny + 'px';
+    });
+    window.addEventListener('mouseup', () => { dragging = false; document.body.style.userSelect = ''; });
+}
+
+/* =======================================================================
+   WINDOW CONTENTS
+   ======================================================================= */
+function openAbout() {
+    const s = state.site, links = s.links || {};
+    const body = `
+        <div class="about-pane">
+            <img class="about-avatar" src="${attr(s.avatar)}" alt="${attr(s.name)}">
+            <h2>${esc(s.name)}</h2>
+            <p class="about-tagline">${esc(s.tagline)}</p>
+            <div class="hero-links">
+                ${links.github ? socialLink(links.github, 'fab fa-github', 'GitHub') : ''}
+                ${links.linkedin ? socialLink(links.linkedin, 'fab fa-linkedin', 'LinkedIn') : ''}
+                ${links.medium ? socialLink(links.medium, 'fab fa-medium', 'Medium') : ''}
+            </div>
+            <p class="about-hint">Tip: double-click the desktop icons, or hit <strong>Start</strong>.</p>
+        </div>`;
+    openWindow('about', { title: 'About Me', icon: '👤', body, width: '440px' });
+}
+
+function openExplorer() {
+    const body = `
+        <div class="explorer">
+            <div class="explorer-bar">
+                <span>🔍</span>
+                <input type="search" id="explorer-search" placeholder="Filter notes by title, tag, or topic…">
+            </div>
+            <div class="explorer-tags">${tagCloud()}</div>
+            <div class="note-grid" id="explorer-grid">${state.notes.map(noteCard).join('') || emptyMsg('No notes yet.')}</div>
+        </div>`;
+    openWindow('notes', { title: 'My Notes', icon: '🗂️', body, width: '760px' });
+
+    const input = document.getElementById('explorer-search');
+    const grid = document.getElementById('explorer-grid');
+    if (input && grid) {
+        input.addEventListener('input', () => {
+            const q = input.value.trim().toLowerCase();
+            const hits = !q ? state.notes : state.notes.filter(n =>
+                `${n.title} ${n.summary} ${(n.tags || []).join(' ')} ${n.category}`.toLowerCase().includes(q));
+            grid.innerHTML = hits.map(noteCard).join('') || emptyMsg('No matching notes.');
+        });
+    }
+}
+
+function openCategoryWindow(catId) {
+    const cat = state.categories.find(c => c.id === catId) || { label: catId, icon: '📁', blurb: '' };
     const notes = state.byCategory.get(catId) || [];
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <section class="section container view-pad">
-            <div class="page-head">
-                <div class="page-head-icon">${esc(cat.icon || '📓')}</div>
-                <div>
-                    <h1 class="section-title left">${esc(cat.label)}</h1>
-                    <p class="section-subtitle left">${esc(cat.blurb || '')}</p>
-                </div>
+    const body = `
+        <div class="page-head">
+            <div class="page-head-icon">${esc(cat.icon || '📁')}</div>
+            <div>
+                <h2>${esc(cat.label)}</h2>
+                <p class="muted">${esc(cat.blurb || '')}</p>
             </div>
-            <div class="note-grid">
-                ${notes.map(noteCard).join('') || emptyMsg('Nothing here yet — check back soon.')}
-            </div>
-        </section>`;
+        </div>
+        <div class="note-grid">${notes.map(noteCard).join('') || emptyMsg('Nothing here yet — check back soon.')}</div>`;
+    openWindow('cat-' + catId, { title: cat.label, icon: cat.icon || '📁', body, width: '720px' });
 }
 
-/* -----------------------------------------------------------------------
-   VIEW: TAG
-   ----------------------------------------------------------------------- */
-function renderTag(tag) {
+function openTagWindow(tag) {
     const notes = state.notes.filter(n => (n.tags || []).includes(tag));
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <section class="section container view-pad">
-            <a class="back-link" href="#/"><i class="fas fa-arrow-left"></i> Home</a>
-            <h1 class="section-title left">#${esc(tag)}</h1>
-            <p class="section-subtitle left">${notes.length} note${notes.length === 1 ? '' : 's'} tagged.</p>
-            <div class="note-grid">
-                ${notes.map(noteCard).join('') || emptyMsg('No notes with this tag.')}
-            </div>
-        </section>`;
+    const body = `
+        <h2 class="tag-head">#${esc(tag)}</h2>
+        <p class="muted">${notes.length} note${notes.length === 1 ? '' : 's'} tagged.</p>
+        <div class="note-grid">${notes.map(noteCard).join('') || emptyMsg('No notes with this tag.')}</div>`;
+    openWindow('tag-' + tag, { title: '#' + tag, icon: '🏷️', body, width: '700px' });
 }
 
-/* -----------------------------------------------------------------------
-   VIEW: SINGLE NOTE
-   ----------------------------------------------------------------------- */
-async function renderNote(slug) {
+async function openNoteWindow(slug) {
     const note = state.bySlug.get(slug);
-    const app = document.getElementById('app');
-    if (!note) return renderError('Note not found.', new Error(slug));
-
-    app.innerHTML = `<div class="loading"><span class="spinner"></span> Loading note…</div>`;
+    if (!note) return openWindow('note-missing', { title: 'Not found', icon: '⚠️', body: errorBody('Note not found.') });
+    const id = 'note-' + slug;
+    if (openWindows.has(id)) return focusWindow(id);
 
     let md;
     try {
@@ -213,93 +335,54 @@ async function renderNote(slug) {
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         md = await resp.text();
     } catch (err) {
-        return renderError('Could not load this note.', err);
+        console.error(err);
+        return openWindow(id, { title: note.title, icon: '📄', body: errorBody('Could not load this note.') });
     }
 
     const cat = state.categories.find(c => c.id === note.category);
     const html = DOMPurify.sanitize(marked.parse(resolveWikiLinks(md)));
-
-    app.innerHTML = `
-        <article class="section container note view-pad">
-            <a class="back-link" href="#/${esc(note.category)}">
-                <i class="fas fa-arrow-left"></i> ${esc(cat ? cat.label : note.category)}
-            </a>
-            <div class="note-meta">
-                <span><i class="far fa-calendar"></i> ${esc(formatDate(note.date))}</span>
-                ${(note.tags || []).map(t => `<a class="tag-chip sm" href="#/tag/${encodeURIComponent(t)}">#${esc(t)}</a>`).join('')}
-            </div>
-            <div class="markdown-body">${html}</div>
-        </article>`;
-
-    app.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+    const body = `
+        <div class="note-meta">
+            <span><i class="far fa-calendar"></i> ${esc(formatDate(note.date))}</span>
+            <span class="muted">in ${esc(cat ? cat.label : note.category)}</span>
+            ${(note.tags || []).map(t => `<a class="tag-chip sm" href="#/tag/${encodeURIComponent(t)}">#${esc(t)}</a>`).join('')}
+        </div>
+        <div class="markdown-body">${html}</div>`;
+    openWindow(id, { title: note.title, icon: '📄', body, width: '640px' });
 }
 
-/* -----------------------------------------------------------------------
-   SEARCH (client-side over the manifest)
-   ----------------------------------------------------------------------- */
-function initSearch() {
-    const input = document.getElementById('search-input');
-    if (!input) return;
-    let panel = document.getElementById('search-panel');
-    if (!panel) {
-        panel = document.createElement('div');
-        panel.id = 'search-panel';
-        panel.className = 'search-panel';
-        document.querySelector('.nav-search').appendChild(panel);
-    }
-
-    const close = () => { panel.classList.remove('open'); panel.innerHTML = ''; };
-
-    input.addEventListener('input', () => {
-        const q = input.value.trim().toLowerCase();
-        if (!q) return close();
-        const hits = state.notes.filter(n => {
-            const hay = `${n.title} ${n.summary} ${(n.tags || []).join(' ')} ${n.category}`.toLowerCase();
-            return hay.includes(q);
-        }).slice(0, 8);
-
-        panel.innerHTML = hits.length
-            ? hits.map(n => `
-                <a class="search-hit" href="#/note/${esc(n.slug)}">
-                    <strong>${esc(n.title)}</strong>
-                    <span>${esc(n.category)} · ${esc(n.summary || '')}</span>
-                </a>`).join('')
-            : `<div class="search-empty">No matches for "${esc(input.value)}"</div>`;
-        panel.classList.add('open');
+function openRecycleBin() {
+    openWindow('recycle', {
+        title: 'Recycle Bin', icon: '🗑️', width: '380px',
+        body: `<div class="about-pane">
+            <div style="font-size:3rem">🗑️</div>
+            <p>The Recycle Bin is empty.</p>
+            <p class="muted">Everything I write here is public &amp; curated — nothing to hide, nothing to delete.</p>
+        </div>`,
     });
-
-    panel.addEventListener('click', e => { if (e.target.closest('a')) { input.value = ''; close(); } });
-    document.addEventListener('click', e => { if (!e.target.closest('.nav-search')) close(); });
 }
 
-/* -----------------------------------------------------------------------
-   MOBILE MENU
-   ----------------------------------------------------------------------- */
-function initMobileMenu() {
-    const btn = document.getElementById('hamburger');
-    const links = document.getElementById('nav-links');
-    if (!btn || !links) return;
-    btn.addEventListener('click', () => {
-        const open = links.classList.toggle('open');
-        btn.classList.toggle('open', open);
-        btn.setAttribute('aria-expanded', open);
+function openShutDown() {
+    openWindow('shutdown', {
+        title: 'Shut Down', icon: '⏻', width: '360px',
+        body: `<div class="about-pane">
+            <div style="font-size:2.4rem">💾</div>
+            <p>It is now safe to close this tab.</p>
+            <p class="muted">…but there are more notes to read. Are you sure?</p>
+        </div>`,
     });
-    links.querySelectorAll('a').forEach(a =>
-        a.addEventListener('click', () => { links.classList.remove('open'); btn.classList.remove('open'); }));
 }
 
-/* -----------------------------------------------------------------------
-   FAKE "VIRUS" POPUP — a tongue-in-cheek Win98 alert plugging Medium.
-   Closing it spawns another at a random spot (classic gag), capped so it
-   never becomes genuinely annoying.
-   ----------------------------------------------------------------------- */
+/* =======================================================================
+   FAKE "VIRUS" POPUP — tongue-in-cheek Win98 alert plugging Medium.
+   Closing it spawns another at a random spot (classic gag), capped.
+   ======================================================================= */
 const MAX_POPUPS = 4;
 let popupCount = 0;
 
 function initFakeVirus() {
     const popup = state.site && state.site.popup;
-    if (!popup || !popup.topic) return;
-    spawnPopup(popup);
+    if (popup && popup.topic) spawnPopup(popup);
 }
 
 function spawnPopup(popup) {
@@ -308,17 +391,18 @@ function spawnPopup(popup) {
 
     const el = document.createElement('div');
     el.className = 'win98-popup';
-    // Random-ish position so multiples scatter across the screen.
-    const x = popupCount === 1 ? 50 : Math.random() * 60 + 5;   // vw
-    const y = popupCount === 1 ? 50 : Math.random() * 50 + 10;  // vh
-    el.style.left = popupCount === 1 ? '50%' : `${x}vw`;
-    el.style.top = popupCount === 1 ? '38%' : `${y}vh`;
-    if (popupCount === 1) el.style.transform = 'translate(-50%, -50%)';
+    el.style.zIndex = 2000;
+    if (popupCount === 1) {
+        el.style.left = '50%'; el.style.top = '34%'; el.style.transform = 'translate(-50%, -50%)';
+    } else {
+        el.style.left = (Math.random() * 60 + 5) + 'vw';
+        el.style.top = (Math.random() * 45 + 8) + 'vh';
+    }
 
     el.innerHTML = `
-        <div class="win98-titlebar">
-            <span><i class="fas fa-triangle-exclamation"></i> System Alert</span>
-            <button class="win98-x" aria-label="Close">✕</button>
+        <div class="title-bar virus">
+            <span class="title-bar-text"><i class="fas fa-triangle-exclamation"></i> System Alert</span>
+            <button class="tb-btn tb-close" aria-label="Close">✕</button>
         </div>
         <div class="win98-body">
             <div class="win98-icon">⚠️</div>
@@ -329,28 +413,34 @@ function spawnPopup(popup) {
         </div>
         <div class="win98-actions">
             <a class="win98-btn win98-primary" href="${link}" target="_blank" rel="noopener">Read it!</a>
-            <button class="win98-btn win98-close">Close</button>
+            <button class="win98-btn win98-dismiss">Close</button>
         </div>`;
-
     document.body.appendChild(el);
 
-    const remove = (spawnNext) => {
-        el.remove();
-        if (spawnNext && popupCount < MAX_POPUPS) spawnPopup(popup);
-    };
-    el.querySelector('.win98-x').addEventListener('click', () => remove(true));
-    el.querySelector('.win98-close').addEventListener('click', () => remove(true));
+    const remove = spawnNext => { el.remove(); if (spawnNext && popupCount < MAX_POPUPS) spawnPopup(popup); };
+    el.querySelector('.tb-close').addEventListener('click', () => remove(true));
+    el.querySelector('.win98-dismiss').addEventListener('click', () => remove(true));
     el.querySelector('.win98-primary').addEventListener('click', () => remove(false));
 }
 
-/* -----------------------------------------------------------------------
+/* =======================================================================
+   TASKBAR CLOCK
+   ======================================================================= */
+function startClock() {
+    const el = document.getElementById('clock');
+    const tick = () => { el.textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); };
+    tick();
+    setInterval(tick, 15000);
+}
+
+/* =======================================================================
    RENDER HELPERS
-   ----------------------------------------------------------------------- */
+   ======================================================================= */
 function noteCard(n) {
     const cat = state.categories.find(c => c.id === n.category);
     return `
         <a class="note-card" href="#/note/${esc(n.slug)}">
-            <div class="note-card-cat">${esc(cat ? cat.icon : '📓')} ${esc(cat ? cat.label : n.category)}</div>
+            <div class="note-card-cat">${esc(cat ? cat.icon : '📄')} ${esc(cat ? cat.label : n.category)}</div>
             <h3>${esc(n.title)}</h3>
             <p>${esc(n.summary || '')}</p>
             <div class="note-card-foot">
@@ -360,21 +450,27 @@ function noteCard(n) {
         </a>`;
 }
 
+function tagCloud() {
+    const tags = [...state.tags.entries()].sort((a, b) => b[1] - a[1]);
+    if (!tags.length) return '';
+    const max = tags[0][1];
+    return tags.map(([tag, count]) => {
+        const size = 0.8 + (count / max) * 0.6;
+        return `<a class="tag-chip" style="font-size:${size.toFixed(2)}rem" href="#/tag/${encodeURIComponent(tag)}">#${esc(tag)}</a>`;
+    }).join('');
+}
+
 function socialLink(href, icon, label) {
     return `<a class="hero-link" href="${attr(href)}" target="_blank" rel="noopener"><i class="${icon}"></i> ${esc(label)}</a>`;
 }
 
-function renderError(msg, err) {
-    console.error(msg, err);
-    document.getElementById('app').innerHTML = `
-        <section class="section container view-pad">
-            <div class="error-box">
-                <h1>🤔 ${esc(msg)}</h1>
-                <p>If you're opening the file directly, run a local server instead — <code>fetch</code> needs HTTP:</p>
-                <pre><code>python3 -m http.server 8000</code></pre>
-                <a class="back-link" href="#/"><i class="fas fa-arrow-left"></i> Back home</a>
-            </div>
-        </section>`;
+function errorBody(msg) {
+    return `<div class="about-pane">
+        <div style="font-size:2.2rem">🤔</div>
+        <p>${esc(msg)}</p>
+        <p class="muted">If you opened the file directly, run a local server — <code>fetch</code> needs HTTP:</p>
+        <pre><code>python3 -m http.server 8000</code></pre>
+    </div>`;
 }
 
 function emptyMsg(text) { return `<p class="empty-msg">${esc(text)}</p>`; }
@@ -388,9 +484,7 @@ function resolveWikiLinks(md) {
     });
 }
 
-function configureMarked() {
-    if (window.marked) marked.setOptions({ breaks: false, gfm: true });
-}
+function configureMarked() { if (window.marked) marked.setOptions({ breaks: false, gfm: true }); }
 
 function formatDate(d) {
     if (!d) return '';

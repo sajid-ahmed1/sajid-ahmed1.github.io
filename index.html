@@ -3,52 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sajid Ahmed's second brain — a public wiki of notes on work, study, and personal curiosities in data science and Gen AI.">
+    <meta name="description" content="Sajid Ahmed's second brain — a public wiki of notes on work, study, and personal curiosities, served as a Windows 98 desktop.">
     <meta property="og:title" content="Sajid Ahmed | Second Brain">
-    <meta property="og:description" content="A public wiki and curiosity map — notes on work, study, and the things I'm learning.">
+    <meta property="og:description" content="A public wiki and curiosity map, presented as a Windows 98 desktop.">
     <meta property="og:image" content="https://avatars.githubusercontent.com/u/69683657?v=4">
-    <title>Sajid Ahmed | Second Brain</title>
+    <title>Sajid Ahmed | Second Brain 98</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <!-- ===================== NAVIGATION ===================== -->
-    <nav id="navbar">
-        <div class="nav-container">
-            <a href="#/" class="nav-logo">
-                <span class="logo-bracket">&lt;</span>SA<span class="logo-bracket">/&gt;</span>
-                <span class="nav-logo-text">second brain</span>
-            </a>
-            <ul class="nav-links" id="nav-links">
-                <li><a href="#/" class="nav-link" data-route="home">Home</a></li>
-                <li><a href="#/work" class="nav-link" data-route="work">Work</a></li>
-                <li><a href="#/study" class="nav-link" data-route="study">Study</a></li>
-                <li><a href="#/personal" class="nav-link" data-route="personal">Personal</a></li>
-            </ul>
-            <div class="nav-search">
-                <i class="fas fa-search"></i>
-                <input type="search" id="search-input" placeholder="Search notes…" aria-label="Search notes">
-            </div>
-            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </nav>
+    <!-- ===================== DESKTOP ===================== -->
+    <div id="desktop">
+        <div id="desktop-icons"><!-- icons injected by JS --></div>
+    </div>
 
-    <!-- ===================== APP ROOT (router renders here) ===================== -->
-    <main id="app">
-        <div class="loading"><span class="spinner"></span> Loading…</div>
-    </main>
+    <!-- Open windows are appended here -->
+    <div id="windows"></div>
 
-    <!-- ===================== FOOTER ===================== -->
-    <footer id="footer">
-        <div class="container">
-            <p>Built in public. Notes live as markdown in <a href="https://github.com/sajid-ahmed1/sajid-ahmed1.github.io/tree/main/notes" target="_blank" rel="noopener"><code>/notes</code></a>.</p>
-            <p class="footer-dim">© <span id="year"></span> Sajid Ahmed · everything here is public &amp; curated</p>
+    <!-- ===================== TASKBAR ===================== -->
+    <div id="taskbar">
+        <button id="start-btn">
+            <span class="start-logo">🪟</span> <strong>Start</strong>
+        </button>
+        <div id="task-buttons"></div>
+        <div id="tray">
+            <span id="clock">--:--</span>
         </div>
-    </footer>
+    </div>
+
+    <!-- Start menu (hidden until Start is clicked) -->
+    <div id="start-menu" class="hidden">
+        <div class="start-sidebar"><span>Second&nbsp;Brain&nbsp;98</span></div>
+        <ul class="start-list" id="start-list"><!-- items injected by JS --></ul>
+    </div>
 
     <!-- Markdown + sanitize + syntax highlight (CDN, no build step) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
