@@ -13,9 +13,9 @@
       "link": "https://medium.com/@sajid.ahmed"
     },
     "widgets": [
-      { "src": "images/widget-1.jpg", "caption": "Cambridge" },
-      { "src": "images/widget-2.jpg", "caption": "Madinah" },
-      { "src": "images/widget-3.jpg", "caption": "Disneyland" }
+      { "src": "/images/widget-1.jpg", "caption": "Cambridge" },
+      { "src": "/images/widget-2.jpg", "caption": "Madinah" },
+      { "src": "/images/widget-3.jpg", "caption": "Disneyland" }
     ]
   },
   "categories": [
