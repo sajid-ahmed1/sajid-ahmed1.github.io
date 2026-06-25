@@ -70,3 +70,31 @@ Guidelines:
 - **Not overly polished.** These are wiki notes, not Medium articles. A bit of roughness is authentic.
 - **No filler.** Cut "In this note I will discuss…" type intros. Jump straight into the point.
 - **British English.** "analyse" not "analyze", "organisations" not "organizations".
+
+## Knowledge wiki (Digital Librarian system)
+
+Alongside the Win98 site, the repo has a Karpathy-inspired knowledge wiki with four folders:
+
+- **`raw/`** — the junk drawer. Messy notes, book clips, quick ideas dumped as markdown logs.
+- **`wiki/`** — organised output. Clean markdown files generated from raw input, with `wiki/index.md` as the home page. Files cross-link each other with standard markdown links.
+- **`outputs/`** — complex briefs, website reports, or answers to hard questions.
+- **`data/graph.json`** — the knowledge graph. Every wiki page is a node, every cross-link is an edge. This powers a visual network graph on the site.
+
+### Operational workflow
+
+When new content is added:
+1. **Ingest** — place raw text into `raw/` as a dated markdown log.
+2. **Wiki generation** — read the raw items, create or update `wiki/` files with clean language and cross-links.
+3. **Graph sync** — scan all cross-links inside `wiki/` and rebuild `data/graph.json` to map every page (node) and link (edge).
+4. **Manifest sync** — if the content should appear on the Win98 desktop, also add an entry to `notes/index.json` and the `.md` file in `notes/<category>/`.
+
+### graph.json format
+
+```json
+{
+  "nodes": [{ "id": "slug", "label": "Display Name", "group": "category" }],
+  "links": [{ "source": "slug-a", "target": "slug-b", "type": "wiki-link|thematic|navigation" }]
+}
+```
+
+Link types: `navigation` (index → page), `wiki-link` (explicit `[[slug]]` cross-reference), `thematic` (same topic cluster, inferred from shared tags or content overlap).

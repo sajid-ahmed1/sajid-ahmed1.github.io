@@ -1,0 +1,16 @@
+# Sajid Ahmed — Knowledge Wiki
+
+This is the organised index of everything in my second brain. Topics are grouped by category and cross-linked where ideas overlap.
+
+## Work
+- [Building RAG Pipelines](building-rag-pipelines.md) — Chunking, embedding choice, and why naive cosine search disappoints.
+
+## Study
+- [Logistic Regression Intuition](logistic-regression-intuition.md) — Log-odds, the sigmoid, and why it's a linear model wearing a curvy coat.
+
+## Personal
+- [How I Take Notes](how-i-take-notes.md) — The system behind this wiki.
+- [How I Update the Second Brain](how-i-update-the-second-brain.md) — Using Claude Code to remove friction from publishing.
+
+## Tech Interests
+- [MarkItDown Token Efficiency](markitdown-token-efficiency.md) — Microsoft's PDF-to-Markdown tool and why it matters for LLM workflows.
