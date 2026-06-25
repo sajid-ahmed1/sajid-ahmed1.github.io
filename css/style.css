@@ -99,7 +99,7 @@ strong { font-weight: 700; }
     border: 2px solid; border-color: var(--light) var(--dark) var(--dark) var(--light);
     box-shadow: inset 1px 1px 0 var(--hilite), 2px 2px 0 rgba(0,0,0,0.35);
 }
-.widget-frame img { width: 100%; height: 116px; object-fit: cover; display: block; border: 1px solid var(--shadow); }
+.widget-frame img { width: 100%; height: 116px; object-fit: cover; display: block; border: 1px solid var(--shadow); image-rendering: pixelated; }
 .widget-caption { margin-top: 4px; text-align: center; color: #fff; font-size: 0.74rem; text-shadow: 1px 1px 1px rgba(0,0,0,0.6); }
 
 /* ---------- WINDOWS ---------- */
