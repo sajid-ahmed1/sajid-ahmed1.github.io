@@ -56,3 +56,17 @@ There is no hash router. Instead a single delegated click handler intercepts any
 - **Wiki-links:** inside a note's markdown, `[[some-slug]]` auto-links to that note (via `resolveWikiLinks()`); an unknown slug renders as bold text, so it's safe to link a note before it exists.
 - **Theme:** Windows 98. All bevels come from the `--face/--hilite/--light/--shadow/--dark` CSS vars in `:root` via the 2-tone-border + inset-`box-shadow` trick; reuse that pattern rather than inventing new borders. `--navy`/`--desktop` are the title-bar and desktop colors.
 - **Fake-virus popup:** `spawnPopup` (capped by `MAX_POPUPS`); content is data-driven from `site.popup` in the manifest.
+
+## Writing style for notes
+
+Notes are written in **Sajid's voice** — first person, casual, opinionated, and natural. They should read like a smart person talking to a friend about something they find interesting, not like documentation or a blog post optimised for SEO.
+
+Guidelines:
+- **First person throughout.** "I've been using…", "What excites me…", not "One might consider…".
+- **Casual but not sloppy.** Contractions are fine ("it's", "don't", "I've"). Slang is fine if it's natural. But keep sentences clear.
+- **Opinionated.** Take a stance. "This is a big deal" is better than "This could potentially be significant."
+- **Personal anecdotes welcome.** Concrete examples from real life ground the writing ("I'm on the sofa in Cambridge, sweating through this heatwave").
+- **Minimal em-dashes.** One or two per note at most. Prefer commas, colons, or full stops instead.
+- **Not overly polished.** These are wiki notes, not Medium articles. A bit of roughness is authentic.
+- **No filler.** Cut "In this note I will discuss…" type intros. Jump straight into the point.
+- **British English.** "analyse" not "analyze", "organisations" not "organizations".

@@ -60,6 +60,15 @@
       "date": "2026-06-25",
       "summary": "Microsoft's open-source PDF-to-Markdown tool and why it matters for anyone working with LLMs and non-standard data.",
       "file": "notes/tech-interests/markitdown-token-efficiency.md"
+    },
+    {
+      "slug": "how-i-update-the-second-brain",
+      "title": "How I update the second brain",
+      "category": "tech-interests",
+      "tags": ["claude-code", "anthropic", "ai-tools", "productivity", "second-brain", "meta"],
+      "date": "2026-06-25",
+      "summary": "Using Claude Code to remove the friction between having a thought and publishing it to a personal wiki.",
+      "file": "notes/tech-interests/how-i-update-the-second-brain.md"
     }
   ]
 }
