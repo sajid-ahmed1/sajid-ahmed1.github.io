@@ -14,6 +14,8 @@ const state = {
     site: null,
     categories: [],
     notes: [],
+    wiki: [],
+    outputs: [],
     bySlug: new Map(),
     byCategory: new Map(),
     tags: new Map(), // tag -> count
@@ -61,6 +63,8 @@ async function loadManifest() {
     state.site = data.site || {};
     state.categories = data.categories || [];
     state.notes = (data.notes || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    state.wiki = (data.wiki || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    state.outputs = (data.outputs || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
     state.byCategory = new Map(state.categories.map(c => [c.id, []]));
     for (const note of state.notes) {
@@ -68,6 +72,10 @@ async function loadManifest() {
         if (!state.byCategory.has(note.category)) state.byCategory.set(note.category, []);
         state.byCategory.get(note.category).push(note);
         for (const tag of note.tags || []) state.tags.set(tag, (state.tags.get(tag) || 0) + 1);
+    }
+    for (const item of [...state.wiki, ...state.outputs]) {
+        state.bySlug.set(item.slug, item);
+        for (const tag of item.tags || []) state.tags.set(tag, (state.tags.get(tag) || 0) + 1);
     }
 }
 
@@ -81,6 +89,8 @@ function buildDesktopIcons() {
         ...state.categories.map(c => ({
             id: 'cat-' + c.id, icon: c.icon || '📁', label: c.label, action: () => openCategoryWindow(c.id),
         })),
+        { id: 'wiki',     icon: '📎', label: 'Wiki',        action: openWikiWindow },
+        { id: 'outputs',  icon: '📊', label: 'Outputs',     action: openOutputsWindow },
         { id: 'graph',    icon: '🕸️', label: 'Brain Map',   action: openKnowledgeGraph },
         { id: 'recycle',  icon: '🗑️', label: 'Recycle Bin', action: openRecycleBin },
     ];
@@ -156,6 +166,8 @@ function buildStartMenu() {
         { sep: true },
         ...state.categories.map(c => ({ icon: c.icon || '📁', label: c.label, action: () => openCategoryWindow(c.id) })),
         { sep: true },
+        { icon: '📎', label: 'Wiki', action: openWikiWindow },
+        { icon: '📊', label: 'Outputs', action: openOutputsWindow },
         { icon: '🕸️', label: 'Brain Map', action: openKnowledgeGraph },
         { icon: '🔍', label: 'Find Notes…', action: () => { openExplorer(); const i = document.getElementById('explorer-search'); if (i) i.focus(); } },
         { icon: '⏻', label: 'Shut Down…', action: openShutDown },
@@ -188,6 +200,8 @@ function initLinkRouting() {
         const parts = a.getAttribute('href').replace(/^#\/?/, '').split('/').filter(Boolean);
         if (!parts.length) return openAbout();
         if (parts[0] === 'note') return openNoteWindow(parts[1]);
+        if (parts[0] === 'wiki') return parts[1] ? openNoteWindow(parts[1]) : openWikiWindow();
+        if (parts[0] === 'output') return parts[1] ? openNoteWindow(parts[1]) : openOutputsWindow();
         if (parts[0] === 'tag') return openTagWindow(decodeURIComponent(parts[1] || ''));
         if (state.byCategory.has(parts[0])) return openCategoryWindow(parts[0]);
     });
@@ -396,6 +410,34 @@ async function openNoteWindow(slug) {
     openWindow(id, { title: note.title, icon: '📄', body, width: '640px' });
 }
 
+function openWikiWindow() {
+    const items = state.wiki;
+    const body = `
+        <div class="page-head">
+            <div class="page-head-icon">📎</div>
+            <div>
+                <h2>Wiki</h2>
+                <p class="muted">Links, tools, and resources I've saved. Dumped here, cleaned up by AI, and linked to my notes via tags.</p>
+            </div>
+        </div>
+        <div class="note-grid">${items.map(n => wikiCard(n)).join('') || emptyMsg('Nothing here yet — dump me a link and I\'ll file it.')}</div>`;
+    openWindow('wiki', { title: 'Wiki', icon: '📎', body, width: '720px' });
+}
+
+function openOutputsWindow() {
+    const items = state.outputs;
+    const body = `
+        <div class="page-head">
+            <div class="page-head-icon">📊</div>
+            <div>
+                <h2>Outputs</h2>
+                <p class="muted">Synthesised briefs, comparisons, and analysis that pull from multiple sources. The hard thinking.</p>
+            </div>
+        </div>
+        <div class="note-grid">${items.map(n => outputCard(n)).join('') || emptyMsg('No outputs yet — ask me a hard question and I\'ll research it.')}</div>`;
+    openWindow('outputs', { title: 'Outputs', icon: '📊', body, width: '720px' });
+}
+
 function openRecycleBin() {
     openWindow('recycle', {
         title: 'Recycle Bin', icon: '🗑️', width: '380px',
@@ -416,6 +458,8 @@ const GRAPH_COLORS = {
     study:          { bg: '#008000', border: '#006000', font: '#ffffff' },
     personal:       { bg: '#800080', border: '#600060', font: '#ffffff' },
     'tech-interests': { bg: '#c06000', border: '#804000', font: '#ffffff' },
+    wiki:           { bg: '#1565c0', border: '#0d47a1', font: '#ffffff' },
+    output:         { bg: '#c62828', border: '#b71c1c', font: '#ffffff' },
 };
 const GRAPH_DEFAULT_COLOR = { bg: '#808080', border: '#404040', font: '#ffffff' };
 
@@ -431,6 +475,8 @@ async function openKnowledgeGraph() {
                 <span class="gl-dot" style="background:#008000"></span> Study
                 <span class="gl-dot" style="background:#800080"></span> Personal
                 <span class="gl-dot" style="background:#c06000"></span> Tech
+                <span class="gl-dot" style="background:#1565c0"></span> Wiki
+                <span class="gl-dot" style="background:#c62828"></span> Output
             </span>
         </div>
         <div id="graph-container" class="sunken" style="height:420px;background:#000;cursor:grab;"></div>
@@ -574,6 +620,38 @@ function noteCard(n) {
     return `
         <a class="note-card" href="#/note/${esc(n.slug)}">
             <div class="note-card-cat">${esc(cat ? cat.icon : '📄')} ${esc(cat ? cat.label : n.category)}</div>
+            <h3>${esc(n.title)}</h3>
+            <p>${esc(n.summary || '')}</p>
+            <div class="note-card-foot">
+                <span class="note-date">${esc(formatDate(n.date))}</span>
+                <div class="note-card-tags">${(n.tags || []).slice(0, 3).map(t => `<span class="tag-chip sm">#${esc(t)}</span>`).join('')}</div>
+            </div>
+        </a>`;
+}
+
+function wikiCard(n) {
+    return `
+        <a class="note-card wiki-card" href="#/note/${esc(n.slug)}">
+            <div class="note-card-head">
+                <div class="note-card-cat">📎 Wiki</div>
+                <span class="kind-badge saved">🔗 Saved</span>
+            </div>
+            <h3>${esc(n.title)}</h3>
+            <p>${esc(n.summary || '')}</p>
+            <div class="note-card-foot">
+                <span class="note-date">${esc(formatDate(n.date))}</span>
+                <div class="note-card-tags">${(n.tags || []).slice(0, 3).map(t => `<span class="tag-chip sm">#${esc(t)}</span>`).join('')}</div>
+            </div>
+        </a>`;
+}
+
+function outputCard(n) {
+    return `
+        <a class="note-card output-card" href="#/note/${esc(n.slug)}">
+            <div class="note-card-head">
+                <div class="note-card-cat">📊 Output</div>
+                <span class="kind-badge output">🧠 Synthesis</span>
+            </div>
             <h3>${esc(n.title)}</h3>
             <p>${esc(n.summary || '')}</p>
             <div class="note-card-foot">

@@ -46,6 +46,16 @@ The site is presented as a Win98 desktop. Double-clicking a desktop icon (or a S
 
 `notes/index.json` drives everything — desktop icons, category windows, tag cloud, explorer search. **Adding a note = create the `.md` file AND add an entry to `notes/index.json`.** The site never directory-scans; it only knows about notes listed in the manifest. Each note entry needs: `slug` (unique, used in `#/note/<slug>` links), `title`, `category` (must match a category `id`), `tags` (array), `date` (`YYYY-MM-DD`, used for sorting/display), `summary`, and `file` (path relative to repo root). The manifest also holds `site` (name, tagline, avatar, social `links`, and a `popup` object for the fake-virus dialog) and the `categories` list (each `id` becomes a desktop icon + Start-menu entry).
 
+### Three content types
+
+The manifest has three arrays, each with its own desktop icon and visual treatment:
+
+- **`notes`** (✍️ Written) — Sajid's original curated writing. These live in `notes/<category>/` and show in category windows. This is what demonstrates thinking to recruiters.
+- **`wiki`** (🔗 Saved) — links, tools, and resources dumped to Claude and cleaned up into markdown. These live in `wiki/` and show in the Wiki window with a blue left border and "Saved" badge. Auto-linked to notes via shared tags.
+- **`outputs`** (🧠 Synthesis) — research briefs, comparisons, and analysis that pull from multiple sources. These live in `outputs/` and show in the Outputs window with a red left border and "Synthesis" badge.
+
+Wiki and output entries use the same schema as notes (`slug`, `title`, `tags`, `date`, `summary`, `file`) but are in separate manifest arrays and rendered with distinct cards. All three types share the same `bySlug` lookup and tag cloud, and all appear in the knowledge graph (`data/graph.json`).
+
 ### Link routing (`initLinkRouting`)
 
 There is no hash router. Instead a single delegated click handler intercepts any `a[href^="#/"]` and opens the matching window: `#/note/<slug>`, `#/<category>`, `#/tag/<tag>`. This is why in-content links — note cards, tag chips, and markdown `[[wiki-links]]` (which `resolveWikiLinks` rewrites to `#/note/<slug>`) — all "just work": they're plain `#/` anchors caught by that handler. `state` (loaded once from the manifest) holds `bySlug`, `byCategory`, and `tags` lookups.

@@ -42,12 +42,23 @@ That's it. The site picks up new notes from the manifest, no build needed.
 Instead of doing the above manually, just open Claude Code and describe what you want to write. Claude knows the structure (via `CLAUDE.md`) and will:
 
 1. Dump your raw thoughts into `raw/` as a dated log
-2. Create the clean markdown note in `notes/<category>/`
+2. Create the clean markdown file in the right place
 3. Add the manifest entry to `notes/index.json`
 4. Update `data/graph.json` with new nodes and edges
-5. Commit and push
+5. Auto-link to existing notes via shared tags
+6. Commit and push
 
-Example: *"New tech interest about XYZ tool, here's what I think about it..."* — Claude handles the rest.
+### Three content types
+
+| Type | Icon | What it is | Example |
+|------|------|-----------|---------|
+| **Notes** | ✍️ | Your original writing and curated thoughts | "Building RAG pipelines that actually retrieve" |
+| **Wiki** | 🔗 | Links, tools, and resources you dump — cleaned up by AI | A URL to a tool with a summary of why it's useful |
+| **Outputs** | 🧠 | Synthesised briefs that pull from multiple sources | "Should we use RAG or fine-tuning for support bots?" |
+
+**Notes** go in `notes/<category>/`. **Wiki** entries go in `wiki/`. **Outputs** go in `outputs/`.
+
+Example: *"Here's a link to this cool tool I found..."* → Claude saves it as a wiki entry, tags it, and links it to your related notes in the knowledge graph.
 
 ## Folder structure
 
@@ -84,7 +95,7 @@ Inside any markdown note, use `[[slug]]` to link to another note. It auto-resolv
 
 ## Knowledge graph
 
-`data/graph.json` powers the interactive Brain Map on the desktop. Each note is a node, each cross-reference is an edge. Node groups match categories (work, study, personal, tech-interests). Edge types:
+`data/graph.json` powers the interactive Brain Map on the desktop. Every note, wiki entry, and output is a node. Cross-references and shared tags become edges. Node groups match content types (work, study, personal, tech-interests, wiki, output). Edge types:
 
 - `navigation` — index links to a page
 - `wiki-link` — explicit `[[slug]]` cross-reference between notes
