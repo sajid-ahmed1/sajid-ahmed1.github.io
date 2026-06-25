@@ -449,7 +449,7 @@ async function openKnowledgeGraph() {
         return;
     }
 
-    const nodes = new vis.DataSet((graphData.nodes || []).map(n => {
+    const nodes = (graphData.nodes || []).map(n => {
         const c = GRAPH_COLORS[n.group] || GRAPH_DEFAULT_COLOR;
         return {
             id: n.id,
@@ -460,9 +460,9 @@ async function openKnowledgeGraph() {
             shape: n.id === 'index' ? 'diamond' : 'dot',
             borderWidth: 2,
         };
-    }));
+    });
 
-    const edges = new vis.DataSet((graphData.links || []).map((l, i) => ({
+    const edges = (graphData.links || []).map((l, i) => ({
         id: i,
         from: l.source,
         to: l.target,
@@ -470,7 +470,7 @@ async function openKnowledgeGraph() {
         width: l.type === 'wiki-link' ? 2 : 1,
         dashes: l.type === 'thematic',
         arrows: l.type === 'wiki-link' ? { to: { enabled: true, scaleFactor: 0.5 } } : undefined,
-    })));
+    }));
 
     const container = win.querySelector('#graph-container');
     if (!container) return;
