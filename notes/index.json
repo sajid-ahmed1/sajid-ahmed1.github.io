@@ -64,11 +64,11 @@
     {
       "slug": "how-i-update-the-second-brain",
       "title": "How I update the second brain",
-      "category": "tech-interests",
+      "category": "personal",
       "tags": ["claude-code", "anthropic", "ai-tools", "productivity", "second-brain", "meta"],
       "date": "2026-06-25",
       "summary": "Using Claude Code to remove the friction between having a thought and publishing it to a personal wiki.",
-      "file": "notes/tech-interests/how-i-update-the-second-brain.md"
+      "file": "notes/personal/how-i-update-the-second-brain.md"
     }
   ]
 }
