@@ -21,7 +21,8 @@
   "categories": [
     { "id": "work", "label": "Work", "icon": "💼", "blurb": "Data science, Gen AI, and engineering notes from the job and side projects." },
     { "id": "study", "label": "Study", "icon": "🎓", "blurb": "Things I'm learning — Cambridge coursework, papers, courses, and concepts." },
-    { "id": "personal", "label": "Personal", "icon": "🌱", "blurb": "Curiosities, reflections, books, and everything that doesn't fit a box." }
+    { "id": "personal", "label": "Personal", "icon": "🌱", "blurb": "Curiosities, reflections, books, and everything that doesn't fit a box." },
+    { "id": "tech-interests", "label": "Tech Interests", "icon": "💡", "blurb": "Tools, trends, and hot takes on things that catch my eye in tech." }
   ],
   "notes": [
     {
@@ -50,6 +51,15 @@
       "date": "2026-06-24",
       "summary": "The system behind this wiki — capture, connect, and curate in public.",
       "file": "notes/personal/how-i-take-notes.md"
+    },
+    {
+      "slug": "markitdown-token-efficiency",
+      "title": "MarkItDown — reduce token spend and increase efficiency",
+      "category": "tech-interests",
+      "tags": ["markitdown", "microsoft", "python", "llm", "tokens", "pdf", "ocr", "open-source", "nlp"],
+      "date": "2026-06-25",
+      "summary": "Microsoft's open-source PDF-to-Markdown tool and why it matters for anyone working with LLMs and non-standard data.",
+      "file": "notes/tech-interests/markitdown-token-efficiency.md"
     }
   ]
 }
