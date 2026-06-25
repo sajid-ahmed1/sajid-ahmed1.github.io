@@ -382,3 +382,22 @@ h3 { font-size: 1rem; font-weight: 700; }
     .tb-btn { width: 24px; height: 22px; }
     .start-item { padding: 9px 12px; }
 }
+
+/* ---------- KNOWLEDGE GRAPH ---------- */
+.graph-toolbar {
+    padding: 4px 6px;
+    background: var(--face);
+    border-bottom: 1px solid var(--shadow);
+    font-size: 11px;
+}
+.graph-legend { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.gl-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--dark);
+    margin-left: 6px;
+}
+.gl-dot:first-child { margin-left: 0; }
+#graph-container { position: relative; }
+.graph-hint { padding: 3px 6px; font-size: 11px; text-align: center; }

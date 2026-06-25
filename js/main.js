@@ -81,6 +81,7 @@ function buildDesktopIcons() {
         ...state.categories.map(c => ({
             id: 'cat-' + c.id, icon: c.icon || '📁', label: c.label, action: () => openCategoryWindow(c.id),
         })),
+        { id: 'graph',    icon: '🕸️', label: 'Brain Map',   action: openKnowledgeGraph },
         { id: 'recycle',  icon: '🗑️', label: 'Recycle Bin', action: openRecycleBin },
     ];
 
@@ -155,6 +156,7 @@ function buildStartMenu() {
         { sep: true },
         ...state.categories.map(c => ({ icon: c.icon || '📁', label: c.label, action: () => openCategoryWindow(c.id) })),
         { sep: true },
+        { icon: '🕸️', label: 'Brain Map', action: openKnowledgeGraph },
         { icon: '🔍', label: 'Find Notes…', action: () => { openExplorer(); const i = document.getElementById('explorer-search'); if (i) i.focus(); } },
         { icon: '⏻', label: 'Shut Down…', action: openShutDown },
     ];
@@ -405,6 +407,94 @@ function openRecycleBin() {
     });
 }
 
+/* -----------------------------------------------------------------------
+   KNOWLEDGE GRAPH — interactive vis-network rendering data/graph.json
+   ----------------------------------------------------------------------- */
+const GRAPH_COLORS = {
+    navigation:     { bg: '#000080', border: '#000060', font: '#ffffff' },
+    work:           { bg: '#c0c000', border: '#808000', font: '#000000' },
+    study:          { bg: '#008000', border: '#006000', font: '#ffffff' },
+    personal:       { bg: '#800080', border: '#600060', font: '#ffffff' },
+    'tech-interests': { bg: '#c06000', border: '#804000', font: '#ffffff' },
+};
+const GRAPH_DEFAULT_COLOR = { bg: '#808080', border: '#404040', font: '#ffffff' };
+
+async function openKnowledgeGraph() {
+    const id = 'knowledge-graph';
+    if (openWindows.has(id)) return focusWindow(id);
+
+    const body = `
+        <div class="graph-toolbar">
+            <span class="graph-legend">
+                <span class="gl-dot" style="background:#000080"></span> Index
+                <span class="gl-dot" style="background:#c0c000"></span> Work
+                <span class="gl-dot" style="background:#008000"></span> Study
+                <span class="gl-dot" style="background:#800080"></span> Personal
+                <span class="gl-dot" style="background:#c06000"></span> Tech
+            </span>
+        </div>
+        <div id="graph-container" class="sunken" style="height:420px;background:#000;cursor:grab;"></div>
+        <div class="graph-hint muted">Click a node to open that note. Drag to pan, scroll to zoom.</div>`;
+    const win = openWindow(id, { title: 'Brain Map', icon: '🕸️', body, width: '720px' });
+
+    let graphData;
+    try {
+        const resp = await fetch('data/graph.json', { cache: 'no-cache' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        graphData = await resp.json();
+    } catch (err) {
+        console.error(err);
+        const c = win.querySelector('#graph-container');
+        if (c) c.innerHTML = '<p style="color:#ccc;padding:2rem;text-align:center">Could not load graph data.</p>';
+        return;
+    }
+
+    const nodes = new vis.DataSet((graphData.nodes || []).map(n => {
+        const c = GRAPH_COLORS[n.group] || GRAPH_DEFAULT_COLOR;
+        return {
+            id: n.id,
+            label: n.label,
+            color: { background: c.bg, border: c.border, highlight: { background: c.bg, border: '#ffffff' } },
+            font: { color: c.font, size: n.id === 'index' ? 16 : 13, face: 'Tahoma, sans-serif' },
+            size: n.id === 'index' ? 28 : 20,
+            shape: n.id === 'index' ? 'diamond' : 'dot',
+            borderWidth: 2,
+        };
+    }));
+
+    const edges = new vis.DataSet((graphData.links || []).map((l, i) => ({
+        id: i,
+        from: l.source,
+        to: l.target,
+        color: { color: '#556666', highlight: '#00ffff' },
+        width: l.type === 'wiki-link' ? 2 : 1,
+        dashes: l.type === 'thematic',
+        arrows: l.type === 'wiki-link' ? { to: { enabled: true, scaleFactor: 0.5 } } : undefined,
+    })));
+
+    const container = win.querySelector('#graph-container');
+    if (!container) return;
+
+    const network = new vis.Network(container, { nodes, edges }, {
+        physics: {
+            forceAtlas2Based: { gravitationalConstant: -40, centralGravity: 0.008, springLength: 140 },
+            solver: 'forceAtlas2Based',
+            stabilization: { iterations: 80 },
+        },
+        interaction: { hover: true, tooltipDelay: 200, zoomView: true, dragView: true },
+    });
+
+    network.on('click', params => {
+        if (!params.nodes.length) return;
+        const nodeId = params.nodes[0];
+        if (nodeId === 'index') return openExplorer();
+        if (state.bySlug.has(nodeId)) openNoteWindow(nodeId);
+    });
+
+    network.on('hoverNode', () => { container.style.cursor = 'pointer'; });
+    network.on('blurNode', () => { container.style.cursor = 'grab'; });
+}
+
 function openShutDown() {
     openWindow('shutdown', {
         title: 'Shut Down', icon: '⏻', width: '360px',
@@ -420,7 +510,7 @@ function openShutDown() {
    FAKE "VIRUS" POPUP — tongue-in-cheek Win98 alert plugging Medium.
    Closing it spawns another at a random spot (classic gag), capped.
    ======================================================================= */
-const MAX_POPUPS = 4;
+const MAX_POPUPS = 1;
 let popupCount = 0;
 
 function initFakeVirus() {
@@ -460,9 +550,9 @@ function spawnPopup(popup) {
         </div>`;
     document.body.appendChild(el);
 
-    const remove = spawnNext => { el.remove(); if (spawnNext && popupCount < MAX_POPUPS) spawnPopup(popup); };
-    el.querySelector('.tb-close').addEventListener('click', () => remove(true));
-    el.querySelector('.win98-dismiss').addEventListener('click', () => remove(true));
+    const remove = () => { el.remove(); };
+    el.querySelector('.tb-close').addEventListener('click', remove);
+    el.querySelector('.win98-dismiss').addEventListener('click', remove);
     el.querySelector('.win98-primary').addEventListener('click', () => remove(false));
 }
 
