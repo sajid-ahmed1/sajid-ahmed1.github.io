@@ -8,6 +8,7 @@
       "linkedin": "https://www.linkedin.com/in/sajid-ahmed-b110a014a/",
       "medium": "https://medium.com/@sajid.ahmed"
     },
+    "cv": "/docs/Sajid_Ahmed_CV.pdf",
     "popup": {
       "topic": "building LLM agents with LangChain",
       "link": "https://medium.com/@sajid.ahmed"
@@ -69,6 +70,15 @@
       "date": "2026-06-25",
       "summary": "Using Claude Code to remove the friction between having a thought and publishing it to a personal wiki.",
       "file": "notes/personal/how-i-update-the-second-brain.md"
+    },
+    {
+      "slug": "about-me",
+      "title": "About me",
+      "category": "personal",
+      "tags": ["career", "vodafone", "cambridge", "data-science", "python", "machine-learning"],
+      "date": "2026-06-26",
+      "summary": "Who I am, what I do at Vodafone, my education, and the tech I work with.",
+      "file": "notes/personal/about-me.md"
     }
   ],
   "wiki": [
