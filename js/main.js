@@ -480,7 +480,11 @@ async function openKnowledgeGraph() {
             </span>
         </div>
         <div id="graph-container" class="sunken" style="height:420px;background:#000;cursor:grab;"></div>
-        <div class="graph-hint muted">Click a node to open that note. Drag to pan, scroll to zoom.</div>`;
+        <div class="graph-hint muted">Click a node to open that note. Drag to pan, scroll to zoom.</div>
+        <div class="graph-edge-legend">
+            <span><span class="edge-line solid"></span> Direct reference</span>
+            <span><span class="edge-line dashed"></span> Shared topic</span>
+        </div>`;
     const win = openWindow(id, { title: 'Brain Map', icon: '🕸️', body, width: '720px' });
 
     let graphData;

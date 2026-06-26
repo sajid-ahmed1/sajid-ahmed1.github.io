@@ -428,3 +428,21 @@ h3 { font-size: 1rem; font-weight: 700; }
 .gl-dot:first-child { margin-left: 0; }
 #graph-container { position: relative; }
 .graph-hint { padding: 3px 6px; font-size: 11px; text-align: center; }
+.graph-edge-legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 4px 6px;
+    font-size: 11px;
+    color: #303030;
+    border-top: 1px solid var(--light);
+}
+.edge-line {
+    display: inline-block;
+    width: 24px;
+    height: 0;
+    border-top: 2px solid #556666;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+.edge-line.dashed { border-top-style: dashed; }
