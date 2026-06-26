@@ -6,7 +6,8 @@
     { "id": "how-i-take-notes", "label": "How I Take Notes", "group": "personal" },
     { "id": "how-i-update-the-second-brain", "label": "How I Update the Second Brain", "group": "personal" },
     { "id": "markitdown-token-efficiency", "label": "MarkItDown Token Efficiency", "group": "tech-interests" },
-    { "id": "karpathy-llm-wiki", "label": "Karpathy's LLM Wiki", "group": "wiki" }
+    { "id": "karpathy-llm-wiki", "label": "Karpathy's LLM Wiki", "group": "wiki" },
+    { "id": "about-me", "label": "About Me", "group": "personal" }
   ],
   "links": [
     { "source": "index", "target": "building-rag-pipelines", "type": "navigation" },
@@ -15,6 +16,7 @@
     { "source": "index", "target": "how-i-update-the-second-brain", "type": "navigation" },
     { "source": "index", "target": "markitdown-token-efficiency", "type": "navigation" },
     { "source": "index", "target": "karpathy-llm-wiki", "type": "navigation" },
+    { "source": "index", "target": "about-me", "type": "navigation" },
     { "source": "building-rag-pipelines", "target": "logistic-regression-intuition", "type": "wiki-link" },
     { "source": "logistic-regression-intuition", "target": "building-rag-pipelines", "type": "wiki-link" },
     { "source": "how-i-take-notes", "target": "how-i-update-the-second-brain", "type": "thematic" },
@@ -22,6 +24,8 @@
     { "source": "karpathy-llm-wiki", "target": "how-i-update-the-second-brain", "type": "thematic" },
     { "source": "karpathy-llm-wiki", "target": "how-i-take-notes", "type": "thematic" },
     { "source": "karpathy-llm-wiki", "target": "building-rag-pipelines", "type": "thematic" },
-    { "source": "karpathy-llm-wiki", "target": "markitdown-token-efficiency", "type": "thematic" }
+    { "source": "karpathy-llm-wiki", "target": "markitdown-token-efficiency", "type": "thematic" },
+    { "source": "about-me", "target": "building-rag-pipelines", "type": "thematic" },
+    { "source": "about-me", "target": "logistic-regression-intuition", "type": "thematic" }
   ]
 }

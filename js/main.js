@@ -319,6 +319,7 @@ function makeDraggable(el, handle) {
    ======================================================================= */
 function openAbout() {
     const s = state.site, links = s.links || {};
+    const cv = s.cv || '';
     const body = `
         <div class="about-pane">
             <img class="about-avatar" src="${attr(s.avatar)}" alt="${attr(s.name)}">
@@ -328,6 +329,7 @@ function openAbout() {
                 ${links.github ? socialLink(links.github, 'fab fa-github', 'GitHub') : ''}
                 ${links.linkedin ? socialLink(links.linkedin, 'fab fa-linkedin', 'LinkedIn') : ''}
                 ${links.medium ? socialLink(links.medium, 'fab fa-medium', 'Medium') : ''}
+                ${cv ? socialLink(cv, 'fas fa-file-pdf', 'My CV') : ''}
             </div>
             <p class="about-hint">Tip: double-click the desktop icons, or hit <strong>Start</strong>.</p>
         </div>`;
