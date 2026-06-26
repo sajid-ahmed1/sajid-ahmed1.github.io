@@ -71,6 +71,15 @@
       "file": "notes/personal/how-i-update-the-second-brain.md"
     }
   ],
-  "wiki": [],
+  "wiki": [
+    {
+      "slug": "karpathy-llm-wiki",
+      "title": "Karpathy's LLM Wiki Pattern",
+      "tags": ["llm", "knowledge-management", "second-brain", "productivity", "rag", "markdown", "andrej-karpathy"],
+      "date": "2026-06-25",
+      "summary": "A pattern for building personal knowledge bases where the LLM maintains a persistent wiki instead of re-deriving answers via RAG every time.",
+      "file": "wiki/karpathy-llm-wiki.md"
+    }
+  ],
   "outputs": []
 }

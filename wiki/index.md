@@ -14,3 +14,6 @@ This is the organised index of everything in my second brain. Topics are grouped
 
 ## Tech Interests
 - [MarkItDown Token Efficiency](markitdown-token-efficiency.md) — Microsoft's PDF-to-Markdown tool and why it matters for LLM workflows.
+
+## Wiki (Saved)
+- [Karpathy's LLM Wiki Pattern](karpathy-llm-wiki.md) — A pattern for persistent LLM-maintained knowledge bases. Contrasts with RAG, connects to my second brain setup.
