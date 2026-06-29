@@ -89,6 +89,14 @@
       "date": "2026-06-25",
       "summary": "A pattern for building personal knowledge bases where the LLM maintains a persistent wiki instead of re-deriving answers via RAG every time.",
       "file": "wiki/karpathy-llm-wiki.md"
+    },
+    {
+      "slug": "generative-ui",
+      "title": "The balancing act between intuitive UI and chatbot agents — Generative UI",
+      "tags": ["generative-ui", "agents", "llm", "ui-design", "ai-tools", "claude-code"],
+      "date": "2026-06-26",
+      "summary": "The middle ground between boring chatbot interactions and fixed hard-to-navigate user interfaces. Inspired by a video on generative UI.",
+      "file": "wiki/generative-ui.md"
     }
   ],
   "outputs": []

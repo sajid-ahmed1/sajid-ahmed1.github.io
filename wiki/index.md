@@ -17,3 +17,4 @@ This is the organised index of everything in my second brain. Topics are grouped
 
 ## Wiki (Saved)
 - [Karpathy's LLM Wiki Pattern](karpathy-llm-wiki.md) — A pattern for persistent LLM-maintained knowledge bases. Contrasts with RAG, connects to my second brain setup.
+- [Generative UI](generative-ui.md) — The middle ground between chatbot interactions and fixed user interfaces. TUI → GUI → Generative UI.
