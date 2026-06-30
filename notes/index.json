@@ -23,7 +23,8 @@
     { "id": "work", "label": "Work", "icon": "💼", "blurb": "Data science, Gen AI, and engineering notes from the job and side projects." },
     { "id": "study", "label": "Study", "icon": "🎓", "blurb": "Things I'm learning — Cambridge coursework, papers, courses, and concepts." },
     { "id": "personal", "label": "Personal", "icon": "🌱", "blurb": "Curiosities, reflections, books, and everything that doesn't fit a box." },
-    { "id": "tech-interests", "label": "Tech Interests", "icon": "💡", "blurb": "Tools, trends, and hot takes on things that catch my eye in tech." }
+    { "id": "tech-interests", "label": "Tech Interests", "icon": "💡", "blurb": "Tools, trends, and hot takes on things that catch my eye in tech." },
+    { "id": "islam", "label": "Islam", "icon": "🕌", "blurb": "Small notes about Islam as I grow and fall more in love with my religion." }
   ],
   "notes": [
     {
@@ -99,5 +100,6 @@
       "file": "wiki/generative-ui.md"
     }
   ],
-  "outputs": []
+  "outputs": [],
+  "projects": []
 }
