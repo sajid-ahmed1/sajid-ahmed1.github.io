@@ -16,6 +16,7 @@ const state = {
     notes: [],
     wiki: [],
     outputs: [],
+    projects: [],
     bySlug: new Map(),
     byCategory: new Map(),
     tags: new Map(), // tag -> count
@@ -65,6 +66,7 @@ async function loadManifest() {
     state.notes = (data.notes || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     state.wiki = (data.wiki || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     state.outputs = (data.outputs || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    state.projects = (data.projects || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
     state.byCategory = new Map(state.categories.map(c => [c.id, []]));
     for (const note of state.notes) {
@@ -73,7 +75,7 @@ async function loadManifest() {
         state.byCategory.get(note.category).push(note);
         for (const tag of note.tags || []) state.tags.set(tag, (state.tags.get(tag) || 0) + 1);
     }
-    for (const item of [...state.wiki, ...state.outputs]) {
+    for (const item of [...state.wiki, ...state.outputs, ...state.projects]) {
         state.bySlug.set(item.slug, item);
         for (const tag of item.tags || []) state.tags.set(tag, (state.tags.get(tag) || 0) + 1);
     }
@@ -91,6 +93,7 @@ function buildDesktopIcons() {
         })),
         { id: 'wiki',     icon: '📎', label: 'Wiki',        action: openWikiWindow },
         { id: 'outputs',  icon: '📊', label: 'Outputs',     action: openOutputsWindow },
+        { id: 'projects', icon: '📋', label: 'Projects',    action: openProjectsWindow },
         { id: 'graph',    icon: '🕸️', label: 'Brain Map',   action: openKnowledgeGraph },
         { id: 'recycle',  icon: '🗑️', label: 'Recycle Bin', action: openRecycleBin },
     ];
@@ -168,6 +171,7 @@ function buildStartMenu() {
         { sep: true },
         { icon: '📎', label: 'Wiki', action: openWikiWindow },
         { icon: '📊', label: 'Outputs', action: openOutputsWindow },
+        { icon: '📋', label: 'Projects', action: openProjectsWindow },
         { icon: '🕸️', label: 'Brain Map', action: openKnowledgeGraph },
         { icon: '🔍', label: 'Find Notes…', action: () => { openExplorer(); const i = document.getElementById('explorer-search'); if (i) i.focus(); } },
         { icon: '⏻', label: 'Shut Down…', action: openShutDown },
@@ -202,6 +206,7 @@ function initLinkRouting() {
         if (parts[0] === 'note') return openNoteWindow(parts[1]);
         if (parts[0] === 'wiki') return parts[1] ? openNoteWindow(parts[1]) : openWikiWindow();
         if (parts[0] === 'output') return parts[1] ? openNoteWindow(parts[1]) : openOutputsWindow();
+        if (parts[0] === 'project') return parts[1] ? openNoteWindow(parts[1]) : openProjectsWindow();
         if (parts[0] === 'tag') return openTagWindow(decodeURIComponent(parts[1] || ''));
         if (state.byCategory.has(parts[0])) return openCategoryWindow(parts[0]);
     });
@@ -438,6 +443,45 @@ function openOutputsWindow() {
         </div>
         <div class="note-grid">${items.map(n => outputCard(n)).join('') || emptyMsg('No outputs yet — ask me a hard question and I\'ll research it.')}</div>`;
     openWindow('outputs', { title: 'Outputs', icon: '📊', body, width: '720px' });
+}
+
+const PROJECT_COLUMNS = [
+    { id: 'backlog',     label: 'Backlog',     icon: '🗒️' },
+    { id: 'in-progress', label: 'In Progress', icon: '🚧' },
+    { id: 'done',        label: 'Done',        icon: '✅' },
+];
+
+function openProjectsWindow() {
+    const body = `
+        <div class="page-head">
+            <div class="page-head-icon">📋</div>
+            <div>
+                <h2>Projects</h2>
+                <p class="muted">What I'm building, right now. Moves left to right as it progresses.</p>
+            </div>
+        </div>
+        <div class="kanban-board">${PROJECT_COLUMNS.map(col => {
+            const items = state.projects.filter(p => p.status === col.id);
+            return `
+                <div class="kanban-col">
+                    <div class="kanban-col-head">${esc(col.icon)} ${esc(col.label)} <span class="kanban-count">${items.length}</span></div>
+                    <div class="kanban-col-body">${items.map(projectCard).join('') || emptyMsg('Nothing here yet.')}</div>
+                </div>`;
+        }).join('')}</div>`;
+    openWindow('projects', { title: 'Projects', icon: '📋', body, width: '780px' });
+}
+
+function projectCard(p) {
+    const inner = `
+        <h3>${esc(p.title)}</h3>
+        <p>${esc(p.summary || '')}</p>
+        <div class="note-card-foot">
+            <span class="note-date">${esc(formatDate(p.date))}</span>
+            <div class="note-card-tags">${(p.tags || []).slice(0, 3).map(t => `<span class="tag-chip sm">#${esc(t)}</span>`).join('')}</div>
+        </div>`;
+    return p.file
+        ? `<a class="note-card kanban-card" href="#/note/${esc(p.slug)}">${inner}</a>`
+        : `<div class="note-card kanban-card">${inner}</div>`;
 }
 
 function openRecycleBin() {
