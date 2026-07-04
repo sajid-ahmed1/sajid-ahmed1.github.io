@@ -101,5 +101,68 @@
     }
   ],
   "outputs": [],
-  "projects": []
+  "projects": [
+    {
+      "slug": "football-rag-agent",
+      "title": "Turning Football Articles into RAG and Structured Data",
+      "summary": "Building a full RAG pipeline from a football analytics book — multimodal extraction, NER, topic modelling, vector search, and a Streamlit agent UI.",
+      "status": "in-progress",
+      "tags": ["rag", "nlp", "python", "spacy", "bertopic", "chroma", "streamlit", "llm"],
+      "date": "2026-07-04",
+      "epics": [
+        {
+          "id": "epic-1",
+          "title": "Ingestion (Multimodal Extraction)",
+          "notes": "Layout is irregular page-to-page — a vision-capable LLM extracting structured JSON per page is more robust than rule-based OCR.",
+          "stories": [
+            { "id": "1.1", "title": "Photograph all pages, organise files", "status": "todo" },
+            { "id": "1.2", "title": "Prompt-engineer a vision-LLM extraction schema (articles/sidebars/tables/captions), test on 3-4 varied pages", "status": "todo" },
+            { "id": "1.3", "title": "Run extraction across full book, save as structured JSON per page", "status": "todo" },
+            { "id": "1.4", "title": "Validate/spot-check accuracy, fix edge cases", "status": "todo" },
+            { "id": "1.5", "title": "Merge outputs into article corpus, tables dataset, entity/caption links", "status": "todo" }
+          ]
+        },
+        {
+          "id": "epic-2",
+          "title": "Structure & Analysis",
+          "stories": [
+            { "id": "2.1", "title": "Run NER (spaCy) on full text, get entity list", "status": "todo" },
+            { "id": "2.2", "title": "Build 'most mentioned' frequency table/chart", "status": "todo" },
+            { "id": "2.3", "title": "Run topic modelling (BERTopic) on chunks", "status": "todo" },
+            { "id": "2.4", "title": "Tag each chunk with its topic + entities as metadata", "status": "todo" }
+          ]
+        },
+        {
+          "id": "epic-3",
+          "title": "RAG Core",
+          "stories": [
+            { "id": "3.1", "title": "Chunk text (decide chunk size/overlap)", "status": "todo" },
+            { "id": "3.2", "title": "Generate embeddings for chunks", "status": "todo" },
+            { "id": "3.3", "title": "Set up vector DB (Chroma), load embeddings + metadata", "status": "todo" },
+            { "id": "3.4", "title": "Build retrieval function (test with manual queries)", "status": "todo" },
+            { "id": "3.5", "title": "Wire retrieval to an LLM for generation, test end-to-end answer quality", "status": "todo" }
+          ]
+        },
+        {
+          "id": "epic-4",
+          "title": "Agent Layer",
+          "stories": [
+            { "id": "4.1", "title": "Add metadata-filtered retrieval (by chapter or entity)", "status": "todo" },
+            { "id": "4.2", "title": "Add a 'compare across chapters' tool", "status": "todo" },
+            { "id": "4.3", "title": "Add a 'generate study guide' tool", "status": "todo" }
+          ]
+        },
+        {
+          "id": "epic-5",
+          "title": "Interface",
+          "stories": [
+            { "id": "5.1", "title": "Basic Streamlit search box → answer", "status": "todo" },
+            { "id": "5.2", "title": "Add entity/topic dashboard view", "status": "todo" },
+            { "id": "5.3", "title": "Polish UI, add example queries", "status": "todo" },
+            { "id": "5.4", "title": "Deploy (Streamlit Cloud or similar)", "status": "todo" }
+          ]
+        }
+      ]
+    }
+  ]
 }
