@@ -432,10 +432,53 @@ h3 { font-size: 1rem; font-weight: 700; }
 .kanban-col-body { display: flex; flex-direction: column; gap: 8px; padding: 8px; }
 .kanban-card { cursor: default; }
 a.kanban-card { cursor: pointer; }
+.kanban-prog { font-family: var(--mono); font-size: 0.67rem; color: #555; background: #fff; padding: 1px 6px; border: 1px solid var(--shadow); }
 
 @media (max-width: 820px) {
     .kanban-board { grid-template-columns: 1fr; }
 }
+
+/* ---------- PROJECT DETAIL (Epics / Stories) ---------- */
+.proj-detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.proj-status-badge {
+    flex-shrink: 0; padding: 3px 10px; font-size: 0.76rem; font-weight: 700;
+    border: 2px solid; border-color: var(--light) var(--dark) var(--dark) var(--light);
+}
+.proj-status-badge.status-in-progress { background: #fff3e0; color: #b84c00; }
+.proj-status-badge.status-todo  { background: var(--face); color: #444; }
+.proj-status-badge.status-done  { background: #e8f5e9; color: #2e7d32; }
+
+.epic-list { display: flex; flex-direction: column; gap: 10px; }
+.epic-block {
+    border: 2px solid; border-color: var(--dark) var(--light) var(--light) var(--dark);
+    box-shadow: inset 1px 1px 0 var(--shadow);
+}
+.epic-head {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    background: var(--navy); color: #fff; font-size: 0.82rem; font-weight: 700;
+}
+.epic-label {
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    background: rgba(255,255,255,0.2); padding: 1px 6px;
+}
+.epic-title { flex: 1; }
+.epic-prog { font-family: var(--mono); font-size: 0.7rem; opacity: 0.8; }
+.epic-notes { margin: 8px 10px 2px; font-size: 0.77rem; color: #666; font-style: italic; }
+.story-list { padding: 4px 0; }
+.story-row {
+    display: flex; align-items: center; gap: 8px; padding: 5px 10px;
+    border-top: 1px solid var(--shadow); font-size: 0.8rem;
+}
+.story-row:first-child { border-top: none; }
+.story-id { font-family: var(--mono); font-size: 0.68rem; color: #999; flex-shrink: 0; }
+.story-title { flex: 1; line-height: 1.3; }
+.story-status {
+    flex-shrink: 0; font-size: 0.68rem; padding: 1px 7px; font-weight: 700;
+    border: 1px solid; border-radius: 2px;
+}
+.story-todo        { background: var(--face); color: #555; border-color: var(--shadow); }
+.story-inprogress  { background: #fff3e0; color: #b84c00; border-color: #ffcc80; }
+.story-done        { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
 
 /* ---------- KNOWLEDGE GRAPH ---------- */
 .graph-toolbar {

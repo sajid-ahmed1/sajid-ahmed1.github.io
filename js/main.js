@@ -206,7 +206,13 @@ function initLinkRouting() {
         if (parts[0] === 'note') return openNoteWindow(parts[1]);
         if (parts[0] === 'wiki') return parts[1] ? openNoteWindow(parts[1]) : openWikiWindow();
         if (parts[0] === 'output') return parts[1] ? openNoteWindow(parts[1]) : openOutputsWindow();
-        if (parts[0] === 'project') return parts[1] ? openNoteWindow(parts[1]) : openProjectsWindow();
+        if (parts[0] === 'project') {
+            if (!parts[1]) return openProjectsWindow();
+            const proj = state.projects.find(p => p.slug === parts[1]);
+            if (proj && proj.epics) return openProjectDetailWindow(proj);
+            if (proj && proj.file) return openNoteWindow(parts[1]);
+            return openProjectsWindow();
+        }
         if (parts[0] === 'tag') return openTagWindow(decodeURIComponent(parts[1] || ''));
         if (state.byCategory.has(parts[0])) return openCategoryWindow(parts[0]);
     });
@@ -472,16 +478,61 @@ function openProjectsWindow() {
 }
 
 function projectCard(p) {
+    const doneCount = (p.epics || []).reduce((n, e) => n + (e.stories || []).filter(s => s.status === 'done').length, 0);
+    const totalCount = (p.epics || []).reduce((n, e) => n + (e.stories || []).length, 0);
+    const progress = totalCount ? `<span class="kanban-prog">${doneCount}/${totalCount} done</span>` : '';
     const inner = `
         <h3>${esc(p.title)}</h3>
         <p>${esc(p.summary || '')}</p>
         <div class="note-card-foot">
             <span class="note-date">${esc(formatDate(p.date))}</span>
-            <div class="note-card-tags">${(p.tags || []).slice(0, 3).map(t => `<span class="tag-chip sm">#${esc(t)}</span>`).join('')}</div>
+            <div class="note-card-tags">${(p.tags || []).slice(0, 3).map(t => `<span class="tag-chip sm">#${esc(t)}</span>`).join('')}${progress}</div>
         </div>`;
-    return p.file
-        ? `<a class="note-card kanban-card" href="#/note/${esc(p.slug)}">${inner}</a>`
+    const href = p.epics ? `#/project/${esc(p.slug)}` : (p.file ? `#/note/${esc(p.slug)}` : null);
+    return href
+        ? `<a class="note-card kanban-card" href="${href}">${inner}</a>`
         : `<div class="note-card kanban-card">${inner}</div>`;
+}
+
+const STORY_STATUS = { todo: 'To Do', 'in-progress': 'In Progress', done: 'Done' };
+const STORY_CLS    = { todo: 'story-todo', 'in-progress': 'story-inprogress', done: 'story-done' };
+const PROJ_STATUS  = { todo: 'To Do', 'in-progress': 'In Progress', done: 'Done' };
+
+function openProjectDetailWindow(p) {
+    const epicsHtml = (p.epics || []).map(epic => {
+        const total = (epic.stories || []).length;
+        const done  = (epic.stories || []).filter(s => s.status === 'done').length;
+        const stories = (epic.stories || []).map(s => `
+            <div class="story-row">
+                <span class="story-id">${esc(s.id)}</span>
+                <span class="story-title">${esc(s.title)}</span>
+                <span class="story-status ${STORY_CLS[s.status] || ''}">${STORY_STATUS[s.status] || esc(s.status)}</span>
+            </div>`).join('');
+        return `
+            <div class="epic-block">
+                <div class="epic-head">
+                    <span class="epic-label">Epic</span>
+                    <span class="epic-title">${esc(epic.title)}</span>
+                    <span class="epic-prog">${done}/${total}</span>
+                </div>
+                ${epic.notes ? `<p class="epic-notes">${esc(epic.notes)}</p>` : ''}
+                <div class="story-list">${stories}</div>
+            </div>`;
+    }).join('');
+
+    const statusCls = (p.status || '').replace('-', '-');
+    const body = `
+        <div class="proj-detail-head">
+            <div style="flex:1">
+                <h2 style="margin:0 0 4px">${esc(p.title)}</h2>
+                <p class="muted">${esc(p.summary || '')}</p>
+            </div>
+            <span class="proj-status-badge status-${esc(p.status || '')}">${PROJ_STATUS[p.status] || esc(p.status)}</span>
+        </div>
+        <div class="note-card-tags" style="margin-bottom:14px">${(p.tags || []).map(t => `<span class="tag-chip sm">#${esc(t)}</span>`).join('')}</div>
+        <div class="epic-list">${epicsHtml || emptyMsg('No epics yet.')}</div>`;
+
+    openWindow('proj-' + p.slug, { title: p.title, icon: '📋', body, width: '700px' });
 }
 
 function openRecycleBin() {
