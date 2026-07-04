@@ -474,7 +474,18 @@ function openProjectsWindow() {
                     <div class="kanban-col-body">${items.map(projectCard).join('') || emptyMsg('Nothing here yet.')}</div>
                 </div>`;
         }).join('')}</div>`;
-    openWindow('projects', { title: 'Projects', icon: '📋', body, width: '780px' });
+    const win = openWindow('projects', { title: 'Projects', icon: '📋', body, width: '780px' });
+    if (win) {
+        win.querySelectorAll('.kanban-card[data-slug]').forEach(card => {
+            card.addEventListener('click', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                const proj = state.projects.find(p => p.slug === card.dataset.slug);
+                if (proj && proj.epics) openProjectDetailWindow(proj);
+                else if (proj && proj.file) openNoteWindow(proj.slug);
+            });
+        });
+    }
 }
 
 function projectCard(p) {
@@ -490,7 +501,7 @@ function projectCard(p) {
         </div>`;
     const href = p.epics ? `#/project/${esc(p.slug)}` : (p.file ? `#/note/${esc(p.slug)}` : null);
     return href
-        ? `<a class="note-card kanban-card" href="${href}">${inner}</a>`
+        ? `<a class="note-card kanban-card" href="${href}" data-slug="${esc(p.slug)}">${inner}</a>`
         : `<div class="note-card kanban-card">${inner}</div>`;
 }
 
