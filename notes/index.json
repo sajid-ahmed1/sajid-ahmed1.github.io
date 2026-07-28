@@ -98,6 +98,14 @@
       "date": "2026-06-26",
       "summary": "The middle ground between boring chatbot interactions and fixed hard-to-navigate user interfaces. Inspired by a video on generative UI.",
       "file": "wiki/generative-ui.md"
+    },
+    {
+      "slug": "monzo-data-mesh",
+      "title": "Monzo's \"Meshy\" Data Mesh — Governed Scale at 12,000 dbt Models",
+      "tags": ["data-mesh", "dbt", "data-engineering", "data-governance", "fintech", "sql", "data-pipelines"],
+      "date": "2026-07-28",
+      "summary": "How Monzo governs 12,000+ dbt models across 100+ teams: four-layer architecture, interface contracts, a custom Modelgen CLI, and CI enforcement — with 40% cost reduction.",
+      "file": "wiki/monzo-data-mesh.md"
     }
   ],
   "outputs": [],
