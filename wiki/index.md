@@ -18,3 +18,4 @@ This is the organised index of everything in my second brain. Topics are grouped
 ## Wiki (Saved)
 - [Karpathy's LLM Wiki Pattern](karpathy-llm-wiki.md) — A pattern for persistent LLM-maintained knowledge bases. Contrasts with RAG, connects to my second brain setup.
 - [Generative UI](generative-ui.md) — The middle ground between chatbot interactions and fixed user interfaces. TUI → GUI → Generative UI.
+- [Monzo Data Mesh](monzo-data-mesh.md) — How Monzo governs 12,000+ dbt models across 100+ teams: four-layer architecture, interface contracts, Modelgen CLI, CI enforcement. 40% cost reduction.
