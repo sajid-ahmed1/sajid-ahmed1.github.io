@@ -2,6 +2,53 @@
 
 *Source: [Monzo Engineering Blog](https://monzo.com/blog/a-meshy-approach-to-data)*
 
+## My take
+
+What I find genuinely clever about the Monzo approach is that the governance structure isn't a policy document that sits next to the code — it's *embedded in the code*. The architecture makes model creation inherently compliant, not retrospectively audited. You can't declare a model as a cross-team interface without writing the `access: public` declaration, the owner team, the SLA, and the schema contract into the YAML. The governance materialises as a side effect of building the model correctly.
+
+This is essentially the [Open Knowledge Format](https://okfn.org/) principle applied to dbt models. OKF (championed by the Open Knowledge Foundation, with Google as a major contributor) is the idea that data assets should be described by open, human-readable, machine-parseable metadata attached directly to the asset — not buried in a separate catalogue or a wiki page that goes stale. dbt's `schema.yml` is that, for SQL models in a warehouse.
+
+Here's what a governed interface model actually looks like in practice:
+
+```yaml
+# models/logical/accounts/schema.yml
+version: 2
+
+models:
+  - name: dim_accounts_v1
+    description: "Governed public interface for active and closed Monzo user accounts."
+
+    # --- DATA MESH & GOVERNANCE METADATA ---
+    access: public                 # Exposes this model cross-team (interfaces are 'public')
+    config:
+      contract:
+        enforced: true             # Hard enforcement: schema changes break CI if non-compliant
+      meta:
+        owner_team: "core_banking" # Domain ownership
+        tier: "logical"            # Architectural layer (Normalised or Logical)
+        sla: "06:00 UTC"           # Freshness expectation
+
+    # --- COLUMN DEFINITIONS & CONSTRAINTS ---
+    columns:
+      - name: account_id
+        data_type: string
+        description: "Unique surrogate key for the account."
+        constraints:
+          - type: not_null
+          - type: primary_key
+        tests:
+          - unique
+          - not_null
+```
+
+The moment you write `access: public` and `contract: enforced: true`, dbt's CI will break on any downstream model that references this without the contract being met. Governance isn't a review step — it's a build-time constraint.
+
+I see something similar at Vodafone, where data tables carry attached metadata documents explaining ownership, data classification, and retention policy. The friction there is that those documents live separately from the tables themselves, so they drift. The Monzo/OKF insight is: put the metadata in the same file as the model, in the same git commit, under the same CI check. Then it can't drift.
+
+---
+
+## What Monzo actually built
+
 Monzo's data platform grew to over 100 teams contributing 12,000+ dbt models. At that scale, what works for a small team becomes actively harmful — expensive full-table scans, inconsistent naming, no clear ownership of shared tables, and cross-team changes silently breaking downstream consumers. This post is their answer.
 
 ## The core idea
@@ -23,7 +70,7 @@ The key discipline is that each layer only reads from the layer above it. No jum
 
 ## Interface models — the mesh part
 
-This is the idea I find most interesting. Any normalised or logical model can be declared as an **interface**: a contractual data product that other teams are allowed to depend on. Only declared interfaces can be referenced cross-team. Everything else is considered internal implementation detail.
+Any normalised or logical model can be declared as an **interface**: a contractual data product that other teams are allowed to depend on. Only declared interfaces can be referenced cross-team. Everything else is considered internal implementation detail.
 
 It's the same principle as a well-defined API surface in software engineering — you control what's public, and you own the guarantee that it won't silently break.
 
@@ -47,10 +94,6 @@ New models are compliant from day one with no manual review gate. The reviewer's
 They're ~30% through a company-wide migration. Early numbers:
 - **~40% warehouse cost reduction** in migrated domains
 - **~25% faster data landing times** in some domains
-
-## Why this matters beyond fintech
-
-The four-layer model and the interface concept are broadly applicable. In any large-scale data pipeline — including RAG systems — the same tensions exist: who owns the clean entity layer, what's the contract between the extraction and the retrieval layer, and how do you prevent one team's change from silently degrading another team's quality. This is just those questions solved at warehouse scale.
 
 ## Related
 
