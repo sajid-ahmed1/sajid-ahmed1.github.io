@@ -9,7 +9,8 @@
     { "id": "karpathy-llm-wiki", "label": "Karpathy's LLM Wiki", "group": "wiki" },
     { "id": "about-me", "label": "About Me", "group": "personal" },
     { "id": "generative-ui", "label": "Generative UI", "group": "wiki" },
-    { "id": "monzo-data-mesh", "label": "Monzo Data Mesh", "group": "wiki" }
+    { "id": "monzo-data-mesh", "label": "Monzo Data Mesh", "group": "wiki" },
+    { "id": "football-rag-agent", "label": "Football RAG Agent", "group": "work" }
   ],
   "links": [
     { "source": "index", "target": "building-rag-pipelines", "type": "navigation" },
@@ -34,6 +35,10 @@
     { "source": "generative-ui", "target": "karpathy-llm-wiki", "type": "thematic" },
     { "source": "index", "target": "monzo-data-mesh", "type": "navigation" },
     { "source": "monzo-data-mesh", "target": "building-rag-pipelines", "type": "thematic" },
-    { "source": "monzo-data-mesh", "target": "markitdown-token-efficiency", "type": "thematic" }
+    { "source": "monzo-data-mesh", "target": "markitdown-token-efficiency", "type": "thematic" },
+    { "source": "index", "target": "football-rag-agent", "type": "navigation" },
+    { "source": "football-rag-agent", "target": "building-rag-pipelines", "type": "wiki-link" },
+    { "source": "football-rag-agent", "target": "logistic-regression-intuition", "type": "thematic" },
+    { "source": "football-rag-agent", "target": "markitdown-token-efficiency", "type": "thematic" }
   ]
 }
