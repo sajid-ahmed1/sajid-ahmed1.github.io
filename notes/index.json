@@ -115,6 +115,14 @@
       "date": "2026-07-28",
       "summary": "How Monzo governs 12,000+ dbt models across 100+ teams: four-layer architecture, interface contracts, a custom Modelgen CLI, and CI enforcement — with 40% cost reduction.",
       "file": "wiki/monzo-data-mesh.md"
+    },
+    {
+      "slug": "retention-futility",
+      "title": "Retention Futility — Targeting High-Risk Customers Might Be Ineffective",
+      "tags": ["churn", "uplift-modelling", "causal-inference", "customer-analytics", "marketing-science", "data-science", "machine-learning", "vodafone", "roi"],
+      "date": "2026-08-10",
+      "summary": "Ascarza (2018) flips the standard churn model on its head: the question isn't who will churn, but who will respond to your intervention. Targeting high-risk customers wastes budget on Lost Causes and risks triggering Sleeping Dogs.",
+      "file": "wiki/retention-futility.md"
     }
   ],
   "outputs": [],
