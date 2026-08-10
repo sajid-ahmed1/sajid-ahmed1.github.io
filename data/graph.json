@@ -10,7 +10,8 @@
     { "id": "about-me", "label": "About Me", "group": "personal" },
     { "id": "generative-ui", "label": "Generative UI", "group": "wiki" },
     { "id": "monzo-data-mesh", "label": "Monzo Data Mesh", "group": "wiki" },
-    { "id": "football-rag-agent", "label": "Football RAG Agent", "group": "work" }
+    { "id": "football-rag-agent", "label": "Football RAG Agent", "group": "work" },
+    { "id": "retention-futility", "label": "Retention Futility", "group": "wiki" }
   ],
   "links": [
     { "source": "index", "target": "building-rag-pipelines", "type": "navigation" },
@@ -39,6 +40,9 @@
     { "source": "index", "target": "football-rag-agent", "type": "navigation" },
     { "source": "football-rag-agent", "target": "building-rag-pipelines", "type": "wiki-link" },
     { "source": "football-rag-agent", "target": "logistic-regression-intuition", "type": "thematic" },
-    { "source": "football-rag-agent", "target": "markitdown-token-efficiency", "type": "thematic" }
+    { "source": "football-rag-agent", "target": "markitdown-token-efficiency", "type": "thematic" },
+    { "source": "index", "target": "retention-futility", "type": "navigation" },
+    { "source": "retention-futility", "target": "logistic-regression-intuition", "type": "wiki-link" },
+    { "source": "retention-futility", "target": "monzo-data-mesh", "type": "wiki-link" }
   ]
 }
