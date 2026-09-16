@@ -128,13 +128,20 @@ function buildWidgets() {
     const host = document.getElementById('desktop');
     const spots = [['67%', '13%'], ['80%', '45%'], ['58%', '64%'], ['74%', '28%'], ['85%', '10%'], ['63%', '50%'], ['77%', '72%'], ['87%', '58%'], ['70%', '82%'], ['83%', '78%'], ['60%', '18%']];
 
+    const isMobile = window.innerWidth <= 640;
     widgets.forEach((w, i) => {
         if (!w.src) return;
         const el = document.createElement('div');
         el.className = 'desktop-widget';
-        const pos = spots[i] || [(Math.random() * 55 + 30) + '%', (Math.random() * 60 + 10) + '%'];
-        el.style.left = w.x || pos[0];
-        el.style.top = w.y || pos[1];
+        if (isMobile) {
+            // Stack in bottom-right corner, fanned slightly so the pile is visible
+            el.style.left = (window.innerWidth - 92 - i * 5) + 'px';
+            el.style.top  = (window.innerHeight - 134 - i * 5) + 'px';
+        } else {
+            const pos = spots[i] || [(Math.random() * 55 + 30) + '%', (Math.random() * 60 + 10) + '%'];
+            el.style.left = w.x || pos[0];
+            el.style.top  = w.y || pos[1];
+        }
         el.innerHTML = `
             <div class="widget-frame"><img src="${attr(w.src)}" alt="${attr(w.caption || '')}" draggable="false"></div>
             ${w.caption ? `<div class="widget-caption">${esc(w.caption)}</div>` : ''}`;
