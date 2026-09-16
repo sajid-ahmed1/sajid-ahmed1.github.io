@@ -4,7 +4,25 @@
 
 ## My notes
 
-*(your thoughts go here)*
+As someone who speaks English and Bengali fluently with intermediate Arabic, this video hit differently because I've lived this problem first-hand. When I'm speaking Bengali, I'll regularly drop in English words for concepts that just don't exist cleanly — "boundaries", "networking", "self-care" — because the Bengali substitute either doesn't exist or carries different connotations. And even within Bengali itself, there are words in standard Bangla (Shudho) that have no Sylheti equivalent and vice versa. Dialects of the same language have these gaps. মায়া (*Maya*) is a good example going the other way — Bengali speakers often keep the word in English sentences because English has no container for it. It's not pity, not love, not nostalgia, but has elements of all three.
+
+In Islamic class, I learnt that for some Arabic words there can be 25 or more English words that each capture a partial meaning. The most respected English translations of the Quran were chosen as the best precisely because the translators deliberated over all those candidates and picked the one with the best contextual fit for each occurrence. Not wrong — just the least-bad approximation available.
+
+As-Samad clicked for me when it was explained as: the being who is independent of all people, but everyone is dependent on him. Clean distillation, even if it still condenses several layers. But it's Rahma and the womb that I love most — it completely rewires how I read Al-Fatiha.
+
+What I've always loved about root word analysis is that the root often comes from somewhere completely unexpected, and once you learn where it comes from the meaning deepens immediately. It's why tafsir class was so valuable — it didn't just give me the translation, it gave me the context. Without that layer, I'd have been reading approximations my whole life without knowing what I was missing.
+
+---
+
+## Does this connect to NLP and LLMs?
+
+This is something worth thinking about. LLMs trained heavily on English data appear to "think in English" internally — research probing multilingual models like mBERT and XLM-R finds English-like representations underlying processing of other languages. Which means the model is making the same approximation loss as the translator, just baked into its weights rather than a deliberate choice.
+
+Arabic's trilateral root system is a particular challenge. ر-ح-م (r-h-m) → رحمة (rahma), رحيم (rahim), رحمن (rahman) — the semantic relationship is *in the morphology*, but standard tokenisers chop these into subword pieces and miss the shared root entirely. Arabic-specific models try to handle this but it's unsolved.
+
+There's also the register problem: most Arabic in LLM training data is Modern Standard Arabic or dialectal. Quranic Arabic is a distinct classical register — dense compression, specific forms — so a model trained on modern Arabic may produce fluent but semantically thin interpretations of Quranic vocabulary.
+
+The code-switching piece — dropping English into Bengali when Bengali has no container — is itself a major NLP research area. There's benchmark work on Benglish/Banglish specifically. The informal thing you do naturally is linguistically interesting.
 
 ---
 
