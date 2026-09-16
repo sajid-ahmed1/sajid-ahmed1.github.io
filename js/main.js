@@ -126,7 +126,7 @@ function buildDesktopIcons() {
 function buildWidgets() {
     const widgets = (state.site && state.site.widgets) || [];
     const host = document.getElementById('desktop');
-    const spots = [['67%', '13%'], ['80%', '45%'], ['58%', '64%']]; // scattered, right side
+    const spots = [['67%', '13%'], ['80%', '45%'], ['58%', '64%'], ['74%', '28%'], ['85%', '10%'], ['63%', '50%'], ['77%', '72%'], ['87%', '58%']];
 
     widgets.forEach((w, i) => {
         if (!w.src) return;
