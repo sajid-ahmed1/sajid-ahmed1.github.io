@@ -21,7 +21,10 @@
       { "src": "/images/widget-5.jpg", "caption": "Tenerife" },
       { "src": "/images/widget-6.jpg", "caption": "Sharm El-Sheikh" },
       { "src": "/images/widget-7.jpg", "caption": "Paris" },
-      { "src": "/images/widget-8.jpg", "caption": "Old Trafford" }
+      { "src": "/images/widget-8.jpg", "caption": "Old Trafford" },
+      { "src": "/images/widget-9.jpg", "caption": "Zanzibar" },
+      { "src": "/images/widget-10.jpg", "caption": "Iceland" },
+      { "src": "/images/widget-11.jpg", "caption": "Granada" }
     ]
   },
   "categories": [
