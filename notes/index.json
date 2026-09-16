@@ -90,6 +90,15 @@
       "file": "notes/work/football-rag-agent.md"
     },
     {
+      "slug": "arabic-quran-untranslatable",
+      "title": "Arabic and the Quran — Why Translation Is Always an Approximation",
+      "category": "islam",
+      "tags": ["islam", "arabic", "quran", "linguistics", "language", "translation", "sapir-whorf"],
+      "date": "2026-09-16",
+      "summary": "The Pirahã tribe couldn't hold the concept of 'seven' without a word for it. Arabic has dozens of words the rest of the world has no container for — As-Samad, Fitna, Rahma — and every translation approximates what it can't carry.",
+      "file": "wiki/arabic-quran-untranslatable.md"
+    },
+    {
       "slug": "about-me",
       "title": "About me",
       "category": "personal",
