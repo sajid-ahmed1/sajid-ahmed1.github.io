@@ -354,8 +354,8 @@ h3 { font-size: 1rem; font-weight: 700; }
     .desktop-icon { width: 72px; }
     .di-glyph { font-size: 1.7rem; }
 
-    /* Widgets: visible but small and non-draggable (decorative only) */
-    .desktop-widget { width: 82px; pointer-events: none; touch-action: auto; }
+    /* Widgets: small on mobile but draggable via touch */
+    .desktop-widget { width: 82px; touch-action: none; }
     .widget-frame img { height: 70px; }
     .widget-caption { font-size: 0.66rem; }
 
