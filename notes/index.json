@@ -109,6 +109,14 @@
       "file": "wiki/generative-ui.md"
     },
     {
+      "slug": "arabic-quran-untranslatable",
+      "title": "Arabic and the Quran — Why Translation Is Always an Approximation",
+      "tags": ["islam", "arabic", "quran", "linguistics", "language", "translation", "sapir-whorf"],
+      "date": "2026-09-16",
+      "summary": "The Pirahã tribe couldn't hold the concept of 'seven' without a word for it. Arabic has dozens of words the rest of the world has no container for — As-Samad, Fitna, Rahma — and every translation approximates what it can't carry.",
+      "file": "wiki/arabic-quran-untranslatable.md"
+    },
+    {
       "slug": "monzo-data-mesh",
       "title": "Monzo's \"Meshy\" Data Mesh — Governed Scale at 12,000 dbt Models",
       "tags": ["data-mesh", "dbt", "data-engineering", "data-governance", "fintech", "sql", "data-pipelines"],
