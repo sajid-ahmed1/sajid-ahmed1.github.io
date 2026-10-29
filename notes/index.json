@@ -36,6 +36,15 @@
   ],
   "notes": [
     {
+      "slug": "to-write",
+      "title": "To Write",
+      "category": "work",
+      "tags": ["drafts", "medium", "economics", "writing"],
+      "date": "2026-10-29",
+      "summary": "Running list of article ideas and things to publish. First up: breaking asymmetric information in the employment market.",
+      "file": "notes/work/to-write.md"
+    },
+    {
       "slug": "building-rag-pipelines",
       "title": "Building RAG pipelines that actually retrieve",
       "category": "work",
