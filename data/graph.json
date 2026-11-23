@@ -12,7 +12,8 @@
     { "id": "monzo-data-mesh", "label": "Monzo Data Mesh", "group": "wiki" },
     { "id": "football-rag-agent", "label": "Football RAG Agent", "group": "work" },
     { "id": "retention-futility", "label": "Retention Futility", "group": "wiki" },
-    { "id": "arabic-quran-untranslatable", "label": "Arabic & the Quran", "group": "wiki" }
+    { "id": "arabic-quran-untranslatable", "label": "Arabic & the Quran", "group": "wiki" },
+    { "id": "netflix-personalization-measurement", "label": "Netflix Personalization Measurement", "group": "wiki" }
   ],
   "links": [
     { "source": "index", "target": "building-rag-pipelines", "type": "navigation" },
@@ -45,6 +46,10 @@
     { "source": "index", "target": "retention-futility", "type": "navigation" },
     { "source": "retention-futility", "target": "logistic-regression-intuition", "type": "wiki-link" },
     { "source": "retention-futility", "target": "monzo-data-mesh", "type": "wiki-link" },
-    { "source": "index", "target": "arabic-quran-untranslatable", "type": "navigation" }
+    { "source": "index", "target": "arabic-quran-untranslatable", "type": "navigation" },
+    { "source": "index", "target": "netflix-personalization-measurement", "type": "navigation" },
+    { "source": "netflix-personalization-measurement", "target": "retention-futility", "type": "wiki-link" },
+    { "source": "netflix-personalization-measurement", "target": "logistic-regression-intuition", "type": "wiki-link" },
+    { "source": "netflix-personalization-measurement", "target": "monzo-data-mesh", "type": "wiki-link" }
   ]
 }

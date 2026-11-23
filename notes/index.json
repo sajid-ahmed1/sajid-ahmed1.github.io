@@ -151,6 +151,14 @@
       "file": "wiki/monzo-data-mesh.md"
     },
     {
+      "slug": "netflix-personalization-measurement",
+      "title": "Measuring the Impact of Personalized Recommendations — Netflix",
+      "tags": ["recommendation-systems", "causal-inference", "measurement", "personalization", "machine-learning", "data-science", "counterfactuals", "netflix", "uplift-modelling"],
+      "date": "2026-11-23",
+      "summary": "Netflix's hybrid approach to measuring what personalization actually causes: a low-rank choice model validated against nudge experiments, decomposing recommendation value into exposure, selection, and targeting — with targeting 7x larger than exposure in their current system.",
+      "file": "wiki/netflix-personalization-measurement.md"
+    },
+    {
       "slug": "retention-futility",
       "title": "Retention Futility — Targeting High-Risk Customers Might Be Ineffective",
       "tags": ["churn", "uplift-modelling", "causal-inference", "customer-analytics", "marketing-science", "data-science", "machine-learning", "vodafone", "roi"],
